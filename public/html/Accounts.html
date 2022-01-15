@@ -1,0 +1,36 @@
+<!doctype html>
+
+<html>
+  <link rel="stylesheet" href="Home.css">
+
+  <header>
+    <div class="topnav">
+      <a class="active" href="/Home.html">Home</a>
+      <a href="/Quote.html">Get a Quote</a>
+      <a href="/Accounts.html">Accounts</a>
+      <a href="/StockList.html">Stock List</a>
+
+      <button type="button" id="btnLogout" onclick="logout()" style="height: 30px; width: 75px">Logout</button>
+    </div>
+    <h3 id="AccountsHeader">Accounts</h3>
+  </header>
+
+  <body>
+    <pre><div id="infoDiv">
+      <div>Username: <input type="text" id="username"></input></div>
+      <div>Password: <input type="password" id="password"></input></div>
+
+      <button type="button" id="btnLogin" onclick="validateUser()" style="height: 50px; width: 125px">Login</button>
+      <button type="button" id="btnCreate" onclick="createUser()" style="height: 50px; width: 125px">New User</button>
+    </div></pre>
+
+    <pre><div id="mainDiv">
+
+    </div></pre>
+
+    <!--loading the js file-->
+    <script src="Accounts.js"></script>
+    <script src="Logout.js"></script>
+
+  </body>
+</html>

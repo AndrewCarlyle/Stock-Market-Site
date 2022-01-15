@@ -1,0 +1,15 @@
+html
+  head
+    a="Recommendations for: " + name
+    br
+    br
+    a="Recommendations are based on other users that invest in similar stocks."
+
+  body
+    br
+    each result in resultList
+      br
+      br
+      a= "\nStock: " + result.name
+      br
+      a= "Path count: " + result.count

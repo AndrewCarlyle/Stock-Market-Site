@@ -1,0 +1,32 @@
+<!doctype html>
+
+<html>
+  <link rel="stylesheet" href="Home.css">
+
+  <header>
+    <div class="topnav">
+      <a class="active" href="/Home.html">Home</a>
+      <a href="/Quote.html">Get a Quote</a>
+      <a href="/Accounts.html">Accounts</a>
+      <a href="/StockList.html">Stock List</a>
+    </div>
+    <h3 id="homeHeader">Welcome to the stock market website!</h3>
+  </header>
+
+  <body onload="init()">
+    <pre><div id="homeDiv">
+      <input type="text" id="tickerBox"></input>    <button type="button" id="btnSubmit" onclick="getTicker()" style="height: 50px; width: 125px">Get Info</button>
+    </div></pre>
+
+    <pre><div id="mainDiv">
+      <div id="tickerDiv">Ticker: </div>
+      <div id="priceDiv">Price: $</div>
+    </div></pre>
+
+
+
+    <!--loading the js file-->
+    <script src="Home.js"></script>
+
+  </body>
+</hmtl>

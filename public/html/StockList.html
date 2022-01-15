@@ -1,0 +1,30 @@
+<!doctype html>
+
+<html>
+  <link rel="stylesheet" href="Home.css">
+
+  <header>
+    <div class="topnav">
+      <a class="active" href="/Home.html">Home</a>
+      <a href="/Quote.html">Get a Quote</a>
+      <a href="/Accounts.html">Accounts</a>
+      <a href="/StockList.html">Stock List</a>
+    </div>
+    <h3 id="slHeader">List of Stocks in the Database</h3>
+  </header>
+
+  <body onload="loadStocks()">
+    <pre><div id="homeDiv">
+      <button type="button" id="btnUpdate" onclick="updateStock()" style="height: 50px; width: 125px">Update a Stock</button>
+      <button type="button" id="btnAdd" onclick="addStock()" style="height: 50px; width: 125px">Add a Stock</button>
+      <button type="button" id="btnRemove" onclick="removeStock()" style="height: 50px; width: 125px">Remove a Stock</button>
+    </div></pre>
+
+    <pre><div id="slMainDiv">
+    </div></pre>
+
+    <!--loading the js file-->
+    <script src="StockList.js"></script>
+
+  </body>
+</hmtl>
