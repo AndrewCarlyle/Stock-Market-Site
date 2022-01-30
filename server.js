@@ -5,6 +5,7 @@ TODO:
 3. Add logout buttons
 4. Add current user info to the top right corner (regardless of the current page, maybe use js within the .html files?)
 5. Seperate the accounts page into multiple pages or use pug
+6. Redirect '/Accounts' to '/Accounts.html'
 */
 
 //Create express app
@@ -50,16 +51,18 @@ app.use(express.static("public/js"));
 app.use(express.static("public/css"));
 app.use(express.json());
 
+
 app.get('/', sendHome);
 app.get('/Home', sendHome);
 app.get("/Stocklist/Quote/:ticker", getQuote);
-app.get("/Accounts", sendAccounts);
 app.get("/Accounts/Recommendations", recommendationRequest);
 app.get("/Accounts/:AcctNum", getAccount);
 app.get("/Stocklist/Quote", getAllStocks);
+app.get("/Accounts/Logout", logout);
+app.get("/Accounts", sendAccounts);
 
 app.post('/Accounts/Login', login);
-app.post('/Accounts/Logout', logout);
+app.post('/Accounts/Logout', logout, sendHome);
 app.post('/Accounts/CreateProfile', createProfile);
 app.post('/Stocklist/AddStock/:ticker', addStock);
 app.post('/Stocklist/RemoveStock/:ticker', removeStock);
@@ -70,12 +73,12 @@ app.post('/Accounts/Sell', sellStock);
 app.post('/Accounts/AdjustBalance', updateBalance);
 
 function sendHome(req, res, next) {
-	res.sendFile(path.join(__dirname + '/public' + '/Home.html'));
+	res.sendFile(path.join(__dirname + '/public/html' + '/Home.html'));
 	return;
 }
 
 function sendAccounts(req, res, next) {
-	res.sendFile(path.join(__dirname + '/public' + '/Accounts.html'));
+	res.sendFile(path.join(__dirname + '/public/html' + '/Accounts.html'));
 	return;
 }
 
@@ -170,12 +173,13 @@ function login(req, res, next){
 }
 
 function logout(req, res, next){
+	console.log("test")
 	console.log("Logging out " + req.session.name);
 	req.session.loggedin = false;
 	req.session.name = null;
 	req.session.expires = 1;
 	req.session.SSN = null;
-	res.redirect("/Accounts");
+	next();
 }
 
 //Adds a new customer to the Database
