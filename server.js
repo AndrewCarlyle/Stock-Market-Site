@@ -60,6 +60,7 @@ app.get("/Accounts/:AcctNum", getAccount);
 app.get("/Stocklist/Quote", getAllStocks);
 app.get("/Accounts/Logout", logout);
 app.get("/Accounts", sendAccounts);
+app.get("/Accounts/Session", getSessionStatus);
 
 app.post('/Accounts/Login', login);
 app.post('/Accounts/Logout', logout, sendHome);
@@ -173,13 +174,24 @@ function login(req, res, next){
 }
 
 function logout(req, res, next){
-	console.log("test")
-	console.log("Logging out " + req.session.name);
 	req.session.loggedin = false;
 	req.session.name = null;
 	req.session.expires = 1;
 	req.session.SSN = null;
 	next();
+}
+
+//Determines whether the user is currently logged in or not
+function getSessionStatus(req, res, next){
+	let resObj;
+
+	if (req.session.loggedin){
+		resObj = {"Status" : True, "Name" : req.session.name, "SSN" : req.session.SSN};
+	}else{
+		resObj = {"Status" : False};
+	}
+
+	res.status(200).json({"Text": "HEllo"});
 }
 
 //Adds a new customer to the Database
@@ -561,9 +573,7 @@ function updateBalance(req, res, next){
 				}
 			);
 		}else{
-			res.status(404).json(
-				{"text":"Account not found."}
-			);
+			res.status(404).json({"text":"Account not found."});
 		}
 	});
 }
