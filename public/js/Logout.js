@@ -1,9 +1,13 @@
 let loggedin = false;
 
 function logout(){
-  /*let request = new XMLHttpRequest();
+  let request = new XMLHttpRequest();
   request.open("POST", "/Accounts/Logout");
-  request.send();*/
+  request.send();
 
-  window.location.href = '/Accounts/Logout';
+  request.onreadystatechange = function(){
+    if (this.readyState==4){
+      window.location.href = "/Accounts.html";
+    }
+  };
 }
