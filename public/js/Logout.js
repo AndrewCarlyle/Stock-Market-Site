@@ -14,7 +14,6 @@ function logout(){
 
 //Requests the status of the current user's session (logged in or not)
 function sessionStatus(){
-  console.log("Called...")
   let request = new XMLHttpRequest();
   request.open("GET", "/Accounts/Session");
   request.send();
@@ -22,7 +21,15 @@ function sessionStatus(){
   request.onreadystatechange = function(){
     if (this.readyState==4 && this.status == 200){
       let response = JSON.parse(this.responseText);
-      alert("Res obj: " + response);
+      console.log(response)
+      if (response["Status"] == true){
+        //Add logout btn
+        let btnLogout = document.createElement("button");
+        btnLogout.id = "btnLogout";
+        btnLogout.innerHTML = "Logout";
+        btnLogout.onclick = logout;
+        document.getElementById("infoDiv").appendChild(btnLogout);
+      }
     }
   };
 }

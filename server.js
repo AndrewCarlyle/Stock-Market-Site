@@ -54,13 +54,13 @@ app.use(express.json());
 
 app.get('/', sendHome);
 app.get('/Home', sendHome);
+app.get("/Accounts/Session", getSessionStatus);
 app.get("/Stocklist/Quote/:ticker", getQuote);
 app.get("/Accounts/Recommendations", recommendationRequest);
 app.get("/Accounts/:AcctNum", getAccount);
 app.get("/Stocklist/Quote", getAllStocks);
 app.get("/Accounts/Logout", logout);
 app.get("/Accounts", sendAccounts);
-app.get("/Accounts/Session", getSessionStatus);
 
 app.post('/Accounts/Login', login);
 app.post('/Accounts/Logout', logout, sendHome);
@@ -186,12 +186,12 @@ function getSessionStatus(req, res, next){
 	let resObj;
 
 	if (req.session.loggedin){
-		resObj = {"Status" : True, "Name" : req.session.name, "SSN" : req.session.SSN};
+		resObj = {"Status" : true, "Name" : req.session.name, "SSN" : req.session.SSN};
 	}else{
-		resObj = {"Status" : False};
+		resObj = {"Status" : false};
 	}
 
-	res.status(200).json({"Text": "HEllo"});
+	res.status(200).json(resObj);
 }
 
 //Adds a new customer to the Database
