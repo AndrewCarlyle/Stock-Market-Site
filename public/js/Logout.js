@@ -29,7 +29,12 @@ function sessionStatus(){
         btnLogout.innerHTML = "Logout";
         btnLogout.onclick = logout;
         document.getElementById("infoDiv").appendChild(btnLogout);
+        /*btnLogout.style.position = "absolute";
+        btnLogout.style.top = "50px";
+        btnLogout.style.left = "800px"
+        btnLogout.style.color = "blue"*/
+        btnLogout.style = "height: 30px; width: 75px; position: relative; top: 71%; left: 18%"
       }
     }
-  };
+  }
 }
