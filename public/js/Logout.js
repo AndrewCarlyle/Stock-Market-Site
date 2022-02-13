@@ -26,6 +26,7 @@ function sessionStatus(){
 
         if (window.location.href.endsWith("Accounts") || window.location.href.endsWith("Accounts.html")){
           //Redirect
+          window.location.href = "/Accounts/List"
         }else{
           let btnLogout = document.createElement("button");
           btnLogout.id = "btnLogout";
@@ -34,7 +35,6 @@ function sessionStatus(){
           document.getElementById("head").appendChild(btnLogout);
           btnLogout.style = "height: 30px; width: 75px; position: relative; top: 10px; left: 20%";
 
-          //Try create element instead?
           let lblName = document.createElement("a");
           lblName.innerHTML = "\nlogged in as:\n" + response["Name"];
           document.getElementById("head").appendChild(lblName);

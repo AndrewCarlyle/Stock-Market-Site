@@ -51,8 +51,7 @@ app.use(express.static("public/js"));
 app.use(express.static("public/css"));
 app.use(express.json());
 
-
-app.get('/', sendHome);
+app.get("/Accounts/List", getAccountList);
 app.get('/Home', sendHome);
 app.get("/Accounts/Session", getSessionStatus);
 app.get("/Stocklist/Quote/:ticker", getQuote);
@@ -61,6 +60,7 @@ app.get("/Accounts/:AcctNum", getAccount);
 app.get("/Stocklist/Quote", getAllStocks);
 app.get("/Accounts/Logout", logout);
 app.get("/Accounts", sendAccounts);
+app.get('/', sendHome);
 
 app.post('/Accounts/Login', login);
 app.post('/Accounts/Logout', logout, sendHome);
@@ -179,6 +179,16 @@ function logout(req, res, next){
 	req.session.expires = 1;
 	req.session.SSN = null;
 	next();
+}
+
+//Responds to the users request with a list of all their accounts
+function getAccountList(req, res, next){
+	console.log("Here")
+	if (req.session.loggedin == false){
+		res.render("AccountList.pug", {result: "Bad"})
+	}else{
+		res.render("AccountList.pug", {result: "Good"})
+	}
 }
 
 //Determines whether the user is currently logged in or not
