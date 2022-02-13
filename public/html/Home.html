@@ -13,7 +13,7 @@
     <h3 id="homeHeader">Welcome to the stock market website!</h3>
   </header>
 
-  <body onload="init()">
+  <body onload="init(); sessionStatus();">
     <pre><div id="homeDiv">
       <input type="text" id="tickerBox"></input>    <button type="button" id="btnSubmit" onclick="getTicker()" style="height: 50px; width: 125px">Get Info</button>
     </div></pre>
@@ -27,6 +27,7 @@
 
     <!--loading the js file-->
     <script src="Home.js"></script>
+    <script src="Logout.js"></script>
 
   </body>
 </hmtl>

@@ -13,18 +13,19 @@
     <h3 id="slHeader">List of Stocks in the Database</h3>
   </header>
 
-  <body onload="loadStocks()">
+  <body onload="loadStocks(); sessionStatus();">
     <pre><div id="homeDiv">
       <button type="button" id="btnUpdate" onclick="updateStock()" style="height: 50px; width: 125px">Update a Stock</button>
       <button type="button" id="btnAdd" onclick="addStock()" style="height: 50px; width: 125px">Add a Stock</button>
       <button type="button" id="btnRemove" onclick="removeStock()" style="height: 50px; width: 125px">Remove a Stock</button>
     </div></pre>
 
-    <pre><div id="slMainDiv">
+    <pre><div id="mainDiv">
     </div></pre>
 
     <!--loading the js file-->
     <script src="StockList.js"></script>
+    <script src="Logout.js"></script>
 
   </body>
 </hmtl>

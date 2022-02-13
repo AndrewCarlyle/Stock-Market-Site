@@ -23,17 +23,23 @@ function sessionStatus(){
       let response = JSON.parse(this.responseText);
       console.log(response)
       if (response["Status"] == true){
-        //Add logout btn
-        let btnLogout = document.createElement("button");
-        btnLogout.id = "btnLogout";
-        btnLogout.innerHTML = "Logout";
-        btnLogout.onclick = logout;
-        document.getElementById("infoDiv").appendChild(btnLogout);
-        /*btnLogout.style.position = "absolute";
-        btnLogout.style.top = "50px";
-        btnLogout.style.left = "800px"
-        btnLogout.style.color = "blue"*/
-        btnLogout.style = "height: 30px; width: 75px; position: relative; top: 71%; left: 18%"
+
+        if (window.location.href.endsWith("Accounts") || window.location.href.endsWith("Accounts.html")){
+          //Redirect
+        }else{
+          let btnLogout = document.createElement("button");
+          btnLogout.id = "btnLogout";
+          btnLogout.innerHTML = "Logout";
+          btnLogout.onclick = logout;
+          document.getElementById("head").appendChild(btnLogout);
+          btnLogout.style = "height: 30px; width: 75px; position: relative; top: 10px; left: 20%";
+
+          //Try create element instead?
+          let lblName = document.createElement("a");
+          lblName.innerHTML = "\nlogged in as:\n" + response["Name"];
+          document.getElementById("head").appendChild(lblName);
+          lblName.style = "font-size: 18px; position: relative; top: 50px; left: 8%";
+        }
       }
     }
   }

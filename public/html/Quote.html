@@ -13,7 +13,7 @@
     <h3 id="QuoteHeader">Get a stock quote:</h3>
   </header>
 
-  <body>
+  <body onload="sessionStatus(); sessionStatus();">
     <pre><div id="mainDiv">
       <input type="text" id="tickerBox"></input>    <button type="button" id="btnSubmit" onclick="getTicker()" style="height: 50px; width: 125px">Get Info</button>
     </div></pre>
@@ -27,6 +27,7 @@
 
     <!--loading the js file as well as the socket.io file-->
     <script src="Home.js"></script>
+    <script src="Logout.js"></script>
 
   </body>
 </html>
