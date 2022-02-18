@@ -1,10 +1,16 @@
 html
   head
-    a="Recommendations for: " + result
+    a="Recommendations for: " + accounts
     br
     br
-    a="Recommendations are based on other users that invest in similar stocks."
 
   body
     br
     a="test"
+    each account in accounts
+      br
+      br
+      a=account.Type + " (" + account.AcctNum + ")"
+      br
+      &nbsp;
+      a="Balance: $" + account.Balance

@@ -185,9 +185,12 @@ function logout(req, res, next){
 function getAccountList(req, res, next){
 	console.log("Here")
 	if (req.session.loggedin == false){
-		res.render("AccountList.pug", {result: "Bad"})
+		res.status(401).send("Please log in to view your accounts.")
 	}else{
-		res.render("AccountList.pug", {result: "Good"})
+		db.all("SELECT * FROM CustomerAccounts natural join accounts WHERE SSN like " + req.session.SSN, function(err, rows) {
+			console.log(rows)
+			res.render("AccountList.pug", {accounts: rows})
+		});
 	}
 }
 
