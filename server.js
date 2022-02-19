@@ -183,12 +183,10 @@ function logout(req, res, next){
 
 //Responds to the users request with a list of all their accounts
 function getAccountList(req, res, next){
-	console.log("Here")
 	if (req.session.loggedin == false){
 		res.status(401).send("Please log in to view your accounts.")
 	}else{
 		db.all("SELECT * FROM CustomerAccounts natural join accounts WHERE SSN like " + req.session.SSN, function(err, rows) {
-			console.log(rows)
 			res.render("AccountList.pug", {accounts: rows})
 		});
 	}

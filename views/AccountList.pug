@@ -3,6 +3,9 @@ html
     a="Recommendations for: " + accounts
     br
     br
+    link(rel='stylesheet', href='css/Home.css')
+    style
+      include css/Home.css
 
   body
     br
@@ -10,7 +13,6 @@ html
     each account in accounts
       br
       br
-      a=account.Type + " (" + account.AcctNum + ")"
+      a(href="/Accounts/"+account.AcctNum)=account.Type + " (" + account.AcctNum + ")"
       br
-      &nbsp;
       a="Balance: $" + account.Balance
