@@ -187,7 +187,7 @@ function getAccountList(req, res, next){
 		res.status(401).send("Please log in to view your accounts.")
 	}else{
 		db.all("SELECT * FROM CustomerAccounts natural join accounts WHERE SSN like " + req.session.SSN, function(err, rows) {
-			res.render("AccountList.pug", {accounts: rows})
+			res.render("AccountList.pug", {accounts: rows, optionList:["TFSA", "RRSP", "RRIF", "LIRA", "RESP", "Cash"]})
 		});
 	}
 }

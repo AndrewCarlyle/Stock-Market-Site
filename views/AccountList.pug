@@ -3,9 +3,8 @@ html
     a="Recommendations for: " + accounts
     br
     br
-    link(rel='stylesheet', href='css/Home.css')
     style
-      include css/Home.css
+      include css/AccountList.css
 
   body
     br
@@ -13,6 +12,15 @@ html
     each account in accounts
       br
       br
-      a(href="/Accounts/"+account.AcctNum)=account.Type + " (" + account.AcctNum + ")"
+      a(href="/Accounts/"+account.AcctNum id="account")=account.Type + " (" + account.AcctNum + ")"
       br
       a="Balance: $" + account.Balance
+
+    br
+    br
+    a="Looking to open a new account? Please select the type for your new account: "
+    br
+    select="test"
+      each opt in optionList
+        option(value=opt)=opt
+    button="Open Account"
