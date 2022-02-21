@@ -5,22 +5,29 @@ html
     br
     style
       include css/AccountList.css
+    script
+      include js/AccountList.js
 
   body
     br
-    a="test"
-    each account in accounts
-      br
-      br
-      a(href="/Accounts/"+account.AcctNum id="account")=account.Type + " (" + account.AcctNum + ")"
-      br
-      a="Balance: $" + account.Balance
+    div(id="accountList")
+      each account in accounts
+        br
+        br
+        a(href="/Accounts/"+account.AcctNum id="account")=account.Type + " (" + account.AcctNum + ")"
+        br
+        a="Balance: $" + account.Balance
 
+    br
+    button(id="btnRecommendations" onclick="getRecommendations()")="Get Recommendations"
     br
     br
     a="Looking to open a new account? Please select the type for your new account: "
     br
-    select="test"
+    br
+
+    select(id="accountTypeSelect")="test"
       each opt in optionList
         option(value=opt)=opt
-    button="Open Account"
+
+    button(onclick="openAccount()")="Open Account"

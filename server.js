@@ -618,7 +618,7 @@ function createMatrix(){
 }
 
 function recommendationRequest(req, res, next){
-		let user = req.query.SSN;
+		let user = req.session.SSN;
 		let name;
 
 		db.get("SELECT * FROM customers WHERE SSN like '" + user + "'", function(err, row) {
