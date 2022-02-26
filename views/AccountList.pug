@@ -1,12 +1,16 @@
 html
   head
-    a="Recommendations for: " + accounts
-    br
-    br
+    div(class="topnav" id="head")
+      a(href="/Home.html")="Home "
+      a(href="/Quote.html")="Quote "
+      a(href="/Accounts.html")="Accounts "
+      a(href="/StockList.html")="Stock List"
     style
       include css/AccountList.css
     script
       include js/AccountList.js
+    script
+      include js/Logout.js
 
   body
     br
