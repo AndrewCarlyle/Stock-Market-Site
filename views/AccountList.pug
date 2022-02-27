@@ -12,7 +12,7 @@ html
     script
       include js/Logout.js
 
-  body
+  body(onload="sessionStatus()")
     br
     div(id="accountList")
       each account in accounts
