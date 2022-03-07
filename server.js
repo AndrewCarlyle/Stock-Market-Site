@@ -2,28 +2,23 @@
 TODO:
 1. Add some kind of ranking system for stocks
 2. Sessions, or something so that non-validated users cannot makes change to accounts
-3. Add logout buttons
-4. Add current user info to the top right corner (regardless of the current page, maybe use js within the .html files?)
-5. Seperate the accounts page into multiple pages or use pug
-6. Redirect '/Accounts' to '/Accounts.html'
+3. Add current user info to the top right corner (regardless of the current page, maybe use js within the .html files?)
+4. Seperate the accounts page into multiple pages or use pug
 */
 
 //Create express app
 const express = require('express');
 let app = express();
+
 const session = require('express-session');
-
 let request = require('request');
-
 const path = require('path');
-
 const fs = require('fs');
-
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-
 var sql = require('sqlite3');
+
 var db = new sql.Database('StockInfo.db');
-let mondb
+let mondb;
 
 const mc = require("mongodb").MongoClient;
 
@@ -40,8 +35,10 @@ const store = new MongoDBStore({
   collection: 'sessions'
 });
 
-// Use the session middleware
-app.use(session({ secret: 'Test', store: store }));
+// Use the session middleware 300000 milliseconds == 5 minutes
+app.use(session({ secret: 'Test',
+									store: store,
+								  cookie:{maxAge:300000}}));
 
 app.set("view engine", "pug");
 
