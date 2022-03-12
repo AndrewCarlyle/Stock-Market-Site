@@ -168,7 +168,6 @@ function logout(req, res, next){
 }
 
 function validateAccountOwner(req, acctNum){
-	console.log("in function")
 	if (req.session.loggedin){
 		db.get("SELECT * FROM CustomerAccounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
 			if (row["SSN"] == req.session.SSN){
@@ -210,7 +209,6 @@ function getSessionStatus(req, res, next){
 
 //Adds a new customer to the Database
 function createProfile(req, res, next){
-
 	try{
 		db.run("INSERT INTO customers VALUES("+req.body["sin"]+", '"+req.body["un"]+"', '"+req.body["address"]+"', '"+req.body["DOB"]+"', '"+req.body["pw"]+"')", function(){
 			mongodb.collection("users").insertOne({Name:req.body["un"], PWord:req.body["pw"]}, function(err, result){
@@ -225,7 +223,6 @@ function createProfile(req, res, next){
 }
 
 function getAccount(req, res, next){
-	console.log("called")
 	result = validateAccountOwner(req, req.params.AcctNum);
 
 	if (result == 403){
@@ -304,7 +301,6 @@ function addStock(req, res, next){
 }
 
 function removeStock(req, res, next){
-
 	let ticker = req.params.ticker;
 
 	db.run("DELETE FROM stocks WHERE Ticker LIKE '" + ticker + "'", function(){
@@ -317,7 +313,6 @@ function removeStock(req, res, next){
 }
 
 function updateStock(req, res, next){
-
 	let ticker = req.params.ticker;
 
 	db.serialize(function() {
@@ -367,12 +362,10 @@ function updateStock(req, res, next){
 				res.status(404).json({"text":"Stock " + ticker + " could not be found in the database."});
 			}
 		});
-
 	});
 }
 
 function openAccount(req, res, next){
-
 	db.serialize(function() {
 			db.all("SELECT AcctNum FROM accounts", function(err, rows){
 
@@ -409,8 +402,6 @@ function openAccount(req, res, next){
 								res.status(201).json({"text": "New " + req.query.Type + " account opened with number: " + accountNum});
 						});
 				});
-
-
 			});
 	});
 }
