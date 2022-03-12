@@ -105,23 +105,14 @@ function getQuote(req, res, next) {
 			});
     //Verifying that the request worked
 		}else if (response != null){
-			db.serialize(function() {
-				db.get("SELECT * FROM stocks WHERE Ticker LIKE '" + tickerID + "'", function(err, row){
-					if (row){
-
-						request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + tickerID +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
-							let ovBody = JSON.parse(overviewBody);
-console.log(ovBody)
-							console.log("UPDATE stocks SET " +
-								"Price = " + parseFloat(response["Time Series (5min)"][response["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
-								", DivYield = " +(ovBody["DividendYield"] * 100) +
-								", YearHigh = " + ovBody["52WeekHigh"] +
-								", YearLow = " + ovBody["52WeekLow"] +
-								" WHERE Ticker LIKE '" + tickerID + "'");
-						});
-					}
-				});
+			db.get("SELECT * FROM stocks WHERE Ticker LIKE '" + tickerID + "'", function(err, row){
+				if (row){
+					request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + tickerID +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
+						let ovBody = JSON.parse(overviewBody);
+					});
+				}
 			});
+
 			res.send(JSON.stringify(response));
     }else{
       console.log("there was an error with the request");
@@ -152,7 +143,6 @@ function login(req, res, next){
 	          }else if (row.PWord == req.query.pass){
 							req.session.loggedin = true;
 							req.session.name = req.query.name;
-							req.session.expires = 10000;
 							req.session.SSN = row.SSN;
 
 							db.all("SELECT AcctNum, Type, Balance FROM accounts NATURAL JOIN CustomerAccounts WHERE SSN like '" + row.SSN + "'", function(err, rows){
@@ -173,9 +163,25 @@ function login(req, res, next){
 function logout(req, res, next){
 	req.session.loggedin = false;
 	req.session.name = null;
-	req.session.expires = 1;
 	req.session.SSN = null;
 	next();
+}
+
+function validateAccountOwner(req, acctNum){
+	console.log("in function")
+	if (req.session.loggedin){
+		db.get("SELECT * FROM CustomerAccounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
+			if (row["SSN"] == req.session.SSN){
+				console.log("validated")
+				return 200;
+			}else{
+				console.log("unathorized")
+				return 403;
+			}
+		});
+	}else{
+		return 401;
+	}
 }
 
 //Responds to the users request with a list of all their accounts
@@ -206,14 +212,12 @@ function getSessionStatus(req, res, next){
 function createProfile(req, res, next){
 
 	try{
-		db.serialize(function(){
-			db.run("INSERT INTO customers VALUES("+req.body["sin"]+", '"+req.body["un"]+"', '"+req.body["address"]+"', '"+req.body["DOB"]+"', '"+req.body["pw"]+"')", function(){
-				mongodb.collection("users").insertOne({Name:req.body["un"], PWord:req.body["pw"]}, function(err, result){
-					console.log("User added to mongo.");
-				});
-
-				res.status(201).json({"text": "Profile created, welcome "+ req.body["un"] +"!"});
+		db.run("INSERT INTO customers VALUES("+req.body["sin"]+", '"+req.body["un"]+"', '"+req.body["address"]+"', '"+req.body["DOB"]+"', '"+req.body["pw"]+"')", function(){
+			mongodb.collection("users").insertOne({Name:req.body["un"], PWord:req.body["pw"]}, function(err, result){
+				console.log("User added to mongo.");
 			});
+
+			res.status(201).json({"text": "Profile created, welcome "+ req.body["un"] +"!"});
 		});
 	}catch{
 		console.log("There was an error with your information");
@@ -221,20 +225,25 @@ function createProfile(req, res, next){
 }
 
 function getAccount(req, res, next){
-	db.serialize(function() {
+	console.log("called")
+	result = validateAccountOwner(req, req.params.AcctNum);
 
+	if (result == 403){
+		res.status(403).send("Error: This account does not belong to you.")
+	}else if (result == 401){
+		res.status(401).send("Error: Please login before accessing this account.")
+	}else if (result == 200){
 		db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
 			res.status(200).json(rows);
 		});
-	});
+	}else{
+		res.status(500).send("The server experienced an error. Please try again.")
+	}
 }
 
 function getAllStocks(req, res, next){
-	db.serialize(function() {
-
-		db.all("SELECT * FROM stocks", function(err, rows) {
-			res.status(200).json(rows);
-		});
+	db.all("SELECT * FROM stocks", function(err, rows) {
+		res.status(200).json(rows);
 	});
 }
 
@@ -266,17 +275,15 @@ function addStock(req, res, next){
 								combinedResponse["Prices"] = JSON.parse(pricesBody);
 								combinedResponse["Overview"] = JSON.parse(overviewBody);
 
-								db.serialize(function(){
-									db.run("INSERT INTO stocks VALUES('" +
-										ticker + "', '" +
-										combinedResponse["Overview"]["Exchange"] + "', " +
-										parseFloat(combinedResponse["Prices"]["Time Series (5min)"][combinedResponse["Prices"]["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) + ", " +
-										(combinedResponse["Overview"]["DividendYield"] * 100) + ", " +
-										combinedResponse["Overview"]["52WeekHigh"] + ", " +
-										combinedResponse["Overview"]["52WeekLow"] + ")",
-										function(){
-											res.status(201).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and added to the database."});
-									});
+								db.run("INSERT INTO stocks VALUES('" +
+									ticker + "', '" +
+									combinedResponse["Overview"]["Exchange"] + "', " +
+									parseFloat(combinedResponse["Prices"]["Time Series (5min)"][combinedResponse["Prices"]["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) + ", " +
+									(combinedResponse["Overview"]["DividendYield"] * 100) + ", " +
+									combinedResponse["Overview"]["52WeekHigh"] + ", " +
+									combinedResponse["Overview"]["52WeekLow"] + ")",
+									function(){
+										res.status(201).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and added to the database."});
 								});
 							}else{
 								console.log("there was an error with the request");
@@ -300,15 +307,12 @@ function removeStock(req, res, next){
 
 	let ticker = req.params.ticker;
 
-	db.serialize(function() {
-		db.run("DELETE FROM stocks WHERE Ticker LIKE '" + ticker + "'", function(){
-			if (this["changes"] > 0){
-				res.status(200).json({"text":"Stock " + ticker + " has been removed from the database."});
-			}else{
-				res.status(404).json({"text":"Stock " + ticker + " could not be found in the database."});
-			}
-		});
-
+	db.run("DELETE FROM stocks WHERE Ticker LIKE '" + ticker + "'", function(){
+		if (this["changes"] > 0){
+			res.status(200).json({"text":"Stock " + ticker + " has been removed from the database."});
+		}else{
+			res.status(404).json({"text":"Stock " + ticker + " could not be found in the database."});
+		}
 	});
 }
 
@@ -339,17 +343,14 @@ function updateStock(req, res, next){
 								combinedResponse["Prices"] = JSON.parse(pricesBody);
 								combinedResponse["Overview"] = JSON.parse(overviewBody);
 
-								db.serialize(function(){
-
-									db.run("UPDATE stocks SET " +
-										"Price = " + parseFloat(combinedResponse["Prices"]["Time Series (5min)"][combinedResponse["Prices"]["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
-										", DivYield = " +(combinedResponse["Overview"]["DividendYield"] * 100) +
-										", YearHigh = " + combinedResponse["Overview"]["52WeekHigh"] +
-										", YearLow = " + combinedResponse["Overview"]["52WeekLow"] +
-										" WHERE Ticker LIKE '" + ticker + "'",
-										function(){
-											res.status(200).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."});
-									});
+								db.run("UPDATE stocks SET " +
+									"Price = " + parseFloat(combinedResponse["Prices"]["Time Series (5min)"][combinedResponse["Prices"]["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
+									", DivYield = " +(combinedResponse["Overview"]["DividendYield"] * 100) +
+									", YearHigh = " + combinedResponse["Overview"]["52WeekHigh"] +
+									", YearLow = " + combinedResponse["Overview"]["52WeekLow"] +
+									" WHERE Ticker LIKE '" + ticker + "'",
+									function(){
+										res.status(200).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."});
 								});
 							}else{
 								console.log("there was an error with the request");
@@ -373,7 +374,6 @@ function updateStock(req, res, next){
 function openAccount(req, res, next){
 
 	db.serialize(function() {
-
 			db.all("SELECT AcctNum FROM accounts", function(err, rows){
 
 				let accountNum;
