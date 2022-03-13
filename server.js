@@ -245,7 +245,6 @@ function getAllStocks(req, res, next){
 }
 
 function addStock(req, res, next){
-
 	let ticker = req.params.ticker;
 
 	db.serialize(function() {
@@ -366,7 +365,9 @@ function updateStock(req, res, next){
 }
 
 function openAccount(req, res, next){
-	db.serialize(function() {
+	if (req.session.loggedin){
+		db.serialize(function() {
+			//Getting list of all account nums to check agaisnt duplicates
 			db.all("SELECT AcctNum FROM accounts", function(err, rows){
 
 				let accountNum;
@@ -395,15 +396,14 @@ function openAccount(req, res, next){
 					}
 				}
 
-				db.run("INSERT INTO accounts VALUES('" + accountNum + "', '" + req.query.Type + "', " + req.query.Balance + ")",
+				db.run("INSERT INTO accounts VALUES('" + accountNum + "', '" + req.query.Type + "', " + req.query.Balance + ")");
+				db.run("INSERT INTO CustomerAccounts VALUES(" + req.session.SSN + ", '" + accountNum + "')",
 					function(){
-						db.run("INSERT INTO CustomerAccounts VALUES(" + req.query.sin + ", '" + accountNum + "')",
-							function(){
-								res.status(201).json({"text": "New " + req.query.Type + " account opened with number: " + accountNum});
-						});
+						res.status(201).json({"text": "New " + req.query.Type + " account opened with number: " + accountNum});
 				});
 			});
-	});
+		});
+	}
 }
 
 function buyStock(req, res, next){

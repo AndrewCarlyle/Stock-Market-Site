@@ -77,7 +77,7 @@ function validateUser(){
 
 //Requests a list of stock recommendations for the user
 function getRecommendations(){
-  window.location.href = "/Accounts/Recommendations?SSN="+sin;
+  window.location.href = "/Accounts/Recommendations";
 }
 
 //Take the result of a request and diplays the information provided for the requested account
@@ -402,7 +402,7 @@ function openAccount(){
 
     //Making a request to get a stock quote
     let request = new XMLHttpRequest();
-    request.open("POST", "/Accounts/OpenAccount?Type=" + selectedType + "&Balance=" + initialDeposit + "&sin=" + sin);
+    request.open("POST", "/Accounts/OpenAccount?Type=" + selectedType + "&Balance=" + initialDeposit);
     request.send();
 
     request.onreadystatechange = function() {
