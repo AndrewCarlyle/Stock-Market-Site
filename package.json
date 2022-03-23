@@ -1,0 +1,31 @@
+{
+  "name": "stock-market-site",
+  "version": "1.0.0",
+  "description": "This is a project that I have taken up using some of my free time. It is a web that allows users to get stock market information a create simulated accounts.",
+  "main": "server.js",
+  "dependencies": {
+    "connect-mongodb-session": "^3.1.1",
+    "express-session": "^1.17.2",
+    "express": "^4.17.2",
+    "mongodb": "^4.3.0",
+    "pug": "^3.0.2",
+    "request": "^2.88.2",
+    "sqlite3": "^5.0.2",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndrewCarlyle/Stock-Market-Site.git"
+  },
+  "author": "Andrew Carlyle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AndrewCarlyle/Stock-Market-Site/issues"
+  },
+  "homepage": "https://github.com/AndrewCarlyle/Stock-Market-Site#readme"
+}

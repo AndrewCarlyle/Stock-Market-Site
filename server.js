@@ -125,38 +125,36 @@ function getQuote(req, res, next) {
 
 function login(req, res, next){
 		//Change this to bring a user to their home page
-		if (req.session.loggedin){
-			db.all("SELECT AcctNum, Type, Balance FROM accounts NATURAL JOIN CustomerAccounts WHERE SSN like '" + req.session.SSN + "'", function(err, rows){
-				if (rows == ""){
-					res.status(200).json({"text":"Logged in as: " + req.session.name});
-					return;
-				}else{
-					res.status(200).json({"text":"Logged in as: " + req.session.name, "accounts":rows, "sin":req.session.SSN});
-					return;
-				}
-			});
-		}else{
-	    db.serialize(function() {
-	      db.get("SELECT * FROM customers WHERE Name like '" + req.query.name + "'", function(err, row) {
-						if (row == null){
-							res.status(401).json({"text":"Not authorized. User does not exist."});
-	          }else if (row.PWord == req.query.pass){
-							req.session.loggedin = true;
-							req.session.name = req.query.name;
-							req.session.SSN = row.SSN;
+	if (req.session.loggedin){
+		db.all("SELECT AcctNum, Type, Balance FROM accounts NATURAL JOIN CustomerAccounts WHERE SSN like '" + req.session.SSN + "'", function(err, rows){
+			if (rows == ""){
+				res.status(200).json({"text":"Logged in as: " + req.session.name});
+				return;
+			}else{
+				res.status(200).json({"text":"Logged in as: " + req.session.name, "accounts":rows, "sin":req.session.SSN});
+				return;
+			}
+		});
+	}else{
+    db.get("SELECT * FROM customers WHERE Name like '" + req.query.name + "'", function(err, row) {
+			if (row == null){
+				res.status(401).json({"text":"Not authorized. User does not exist."});
+      }else if (row.PWord == req.query.pass){
+				req.session.loggedin = true;
+				req.session.name = req.query.name;
+				req.session.SSN = row.SSN;
 
-							db.all("SELECT AcctNum, Type, Balance FROM accounts NATURAL JOIN CustomerAccounts WHERE SSN like '" + row.SSN + "'", function(err, rows){
-								if (rows == ""){
-									res.status(200).json({"text":"Logged in as: " + req.query.name, "sin":row.SSN});
-								}else{
-									res.status(200).json({"text":"Logged in as: " + req.query.name, "accounts":rows, "sin":row.SSN});
-								}
-							});
-	          }else {
-							res.status(401).json({"text":"Not authorized. Invalid password."});
-						}
-	      });
-	    });
+				db.all("SELECT AcctNum, Type, Balance FROM accounts NATURAL JOIN CustomerAccounts WHERE SSN like '" + row.SSN + "'", function(err, rows){
+					if (rows == ""){
+						res.status(200).json({"text":"Logged in as: " + req.query.name, "sin":row.SSN});
+					}else{
+						res.status(200).json({"text":"Logged in as: " + req.query.name, "accounts":rows, "sin":row.SSN});
+					}
+				});
+	    }else {
+				res.status(401).json({"text":"Not authorized. Invalid password."});
+			}
+    });
 	}
 }
 
@@ -171,10 +169,9 @@ function validateAccountOwner(req, acctNum){
 	if (req.session.loggedin){
 		db.get("SELECT * FROM CustomerAccounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
 			if (row["SSN"] == req.session.SSN){
-				console.log("validated")
+				console.log("valid")
 				return 200;
 			}else{
-				console.log("unathorized")
 				return 403;
 			}
 		});
@@ -223,19 +220,24 @@ function createProfile(req, res, next){
 }
 
 function getAccount(req, res, next){
-	result = validateAccountOwner(req, req.params.AcctNum);
+	let result = validateAccountOwner(req, req.params.AcctNum);
 
-	if (result == 403){
-		res.status(403).send("Error: This account does not belong to you.")
-	}else if (result == 401){
-		res.status(401).send("Error: Please login before accessing this account.")
-	}else if (result == 200){
-		db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
-			res.status(200).json(rows);
-		});
-	}else{
-		res.status(500).send("The server experienced an error. Please try again.")
-	}
+	setTimeout(function(){
+		console.log("result: ", result)
+
+		if (result == 403){
+			res.status(403).send("Error: This account does not belong to you.")
+		}else if (result == 401){
+			res.status(401).send("Error: Please login before accessing this account.")
+		}else if (result == 200){
+			db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
+				res.status(200).json(rows);
+			});
+		}else{
+			console.log("Error")
+			res.status(500).send("The server experienced an error. Please try again.")
+		}
+	}, 500);
 }
 
 function getAllStocks(req, res, next){
@@ -411,88 +413,98 @@ function buyStock(req, res, next){
 	let numShares = req.query.numShares;
 	let acctNum = req.query.currAcct;
 
-	request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
-		let prices = JSON.parse(body);
+	let validateResult = validateAccountOwner(req, acctNum);
 
-		//Verifying that the request worked
-		if (prices['Error Message']){
+	if (validateResult == 200){
+		request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
+			let prices = JSON.parse(body);
 
-			res.status(404).json(
-				{"text":"Stock with ticker \"" + ticker + "\" does not exist"}
-			);
-		}else if (prices["Note"]){
-			res.status(409).json(
-				{"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."}
-			);
-		}else if (prices != null){
-			let totalCost = numShares * parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2);
+			//Verifying that the request worked
+			if (prices['Error Message']){
 
-			db.serialize(function(){
-				//Checking that there is sufficient funds
-				db.get("SELECT * FROM accounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
-					if (row){
-						if (row["Balance"] < totalCost){
-							res.status(409).json(
-								{"text":"Insufficient funds to make this transaction, try again with a lower number of shares."}
-							);
-						}else {
-							//Updating the account balance
-							db.run("UPDATE accounts SET Balance = " + (row["Balance"] - totalCost) + " WHERE AcctNum like '" + acctNum + "'");
+				res.status(404).json(
+					{"text":"Stock with ticker \"" + ticker + "\" does not exist"}
+				);
+			}else if (prices["Note"]){
+				res.status(409).json(
+					{"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."}
+				);
+			}else if (prices != null){
+				let totalCost = numShares * parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2);
 
-							db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "'", function(err, row) {
-								//Some shares of this stock already held
-								if (row){
-									let totalShares = parseInt(row["NumShares"]) + parseInt(numShares);
-									let oldCost = parseInt(row["NumShares"]) * row["ShareCost"];
-									let newCost = numShares * prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"];
-									let newAvg = ((oldCost + newCost) / totalShares).toFixed(2);
+				db.serialize(function(){
+					//Checking that there is sufficient funds
+					db.get("SELECT * FROM accounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
+						if (row){
+							if (row["Balance"] < totalCost){
+								res.status(409).json(
+									{"text":"Insufficient funds to make this transaction, try again with a lower number of shares."}
+								);
+							}else {
+								//Updating the account balance
+								db.run("UPDATE accounts SET Balance = " + (row["Balance"] - totalCost) + " WHERE AcctNum like '" + acctNum + "'");
 
-									db.run("UPDATE StocksInAccounts SET " +
-										"NumShares = " + totalShares +
-										", ShareCost = " + newAvg +
-										" WHERE Ticker LIKE '" + ticker + "'",
-										function(){
-											res.status(200).json({"text": numShares + " shares of stock " + ticker + " have been purchased at a price of $" +
-																						parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
-																						" per share (total: " + newCost + ")"});
-									});
-								//No shares of this stock owned
-								}else{
-									//Request to get the exchange name
-									request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
-										let overview = JSON.parse(overviewBody);
+								db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "'", function(err, row) {
+									//Some shares of this stock already held
+									if (row){
+										let totalShares = parseInt(row["NumShares"]) + parseInt(numShares);
+										let oldCost = parseInt(row["NumShares"]) * row["ShareCost"];
+										let newCost = numShares * prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"];
+										let newAvg = ((oldCost + newCost) / totalShares).toFixed(2);
 
-										if (overview["Note"]){
-											res.status(409).json(
-												{"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."}
-											);
-										}else{
-											db.run("INSERT INTO StocksInAccounts VALUES("+
-												"'" + ticker +
-												"', '" + overview["Exchange"] +
-												"', '" + acctNum +
-												"', " + numShares +
-												", " + parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) + ")",
-												function(){
-													let price = parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2);
-													res.status(200).json({"text": numShares + " shares of stock " + ticker + " have been purchased at a price of $" +
-																								price + " per share (total: " + (price * numShares) + ")"});
-											});
-										}
-									});
-								}
-							});
+										db.run("UPDATE StocksInAccounts SET " +
+											"NumShares = " + totalShares +
+											", ShareCost = " + newAvg +
+											" WHERE Ticker LIKE '" + ticker + "'",
+											function(){
+												res.status(200).json({"text": numShares + " shares of stock " + ticker + " have been purchased at a price of $" +
+																							parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
+																							" per share (total: " + newCost + ")"});
+										});
+									//No shares of this stock owned
+									}else{
+										//Request to get the exchange name
+										request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
+											let overview = JSON.parse(overviewBody);
+
+											if (overview["Note"]){
+												res.status(409).json(
+													{"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."}
+												);
+											}else{
+												db.run("INSERT INTO StocksInAccounts VALUES("+
+													"'" + ticker +
+													"', '" + overview["Exchange"] +
+													"', '" + acctNum +
+													"', " + numShares +
+													", " + parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) + ")",
+													function(){
+														let price = parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2);
+														res.status(200).json({"text": numShares + " shares of stock " + ticker + " have been purchased at a price of $" +
+																									price + " per share (total: " + (price * numShares) + ")"});
+												});
+											}
+										});
+									}
+								});
+							}
+						}else{
+							send404(res);
 						}
-					}else{
-						send404(res);
-					}
+					});
 				});
-			});
-		}else{
-			console.log("there was an error with the request");
-			send404(res);
-		}
-	});
+			}else{
+				console.log("there was an error with the request");
+				send404(res);
+			}
+		});
+	}else if (result == 403){
+		res.status(403).send("Error: This account does not belong to you.")
+	}else if (result == 401){
+		res.status(401).send("Error: Please login before accessing this account.")
+	}else{
+		res.status(500).send("The server experienced an error. Please try again.")
+	}
 }
 
 function sellStock(req, res, next){
@@ -500,81 +512,101 @@ function sellStock(req, res, next){
 	let numShares = req.query.numShares;
 	let acctNum = req.query.currAcct;
 
-	db.serialize(function(){
-		//Checking that there is sufficient funds
-		db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "'", function(err, row) {
-			if (row["NumShares"] < numShares){
-				res.status(409).json(
-					{"text":"You own less shares of " + ticker + " than you have requested to sell."}
-				);
-			}else if (!row){
-				res.status(404).json(
-					{"text":"You do not own any shares of the stock with ticker \"" + ticker + "\"."}
-				);
-			}else{
-				request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
-					let prices = JSON.parse(body);
+	let validateResult = validateAccountOwner(req, acctNum);
 
-					//Verifying that the request worked
-					if (prices['Error Message']){
-						res.status(404).json(
-							{"text":"Stock with ticker \"" + ticker + "\" does not exist"}
-						);
-					}else if (prices["Note"]){
-						res.status(409).json(
-							{"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."}
-						);
-					}else{
-						let totalValue = numShares * parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2);
+	if (validateResult == 200){
+		db.serialize(function(){
+			//Checking that there is sufficient funds
+			db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "'", function(err, row) {
+				if (row["NumShares"] < numShares){
+					res.status(409).json(
+						{"text":"You own less shares of " + ticker + " than you have requested to sell."}
+					);
+				}else if (!row){
+					res.status(404).json(
+						{"text":"You do not own any shares of the stock with ticker \"" + ticker + "\"."}
+					);
+				}else{
+					request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
+						let prices = JSON.parse(body);
 
-						db.get("SELECT * FROM accounts WHERE AcctNum like '" + acctNum + "'", function(err, balRow) {
-							//Updating the account balance
-							db.run("UPDATE accounts SET Balance = " + (balRow["Balance"] + totalValue) + " WHERE AcctNum like '" + acctNum + "'");
+						//Verifying that the request worked
+						if (prices['Error Message']){
+							res.status(404).json(
+								{"text":"Stock with ticker \"" + ticker + "\" does not exist"}
+							);
+						}else if (prices["Note"]){
+							res.status(409).json(
+								{"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."}
+							);
+						}else{
+							let totalValue = numShares * parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2);
 
-							if (row["NumShares"] == numShares){
-								db.run("DELETE FROM StocksInAccounts WHERE Ticker LIKE '" + ticker + "'",
-									function(){
-										res.status(200).json({"text": "All shares of stock " + ticker + " (" + numShares + " shares) have been sold at a price of " +
-																					parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
-																					" per share (total: $" + totalValue + ")"});
-								});
-							}else{
-								db.run("UPDATE StocksInAccounts SET " +
-									"NumShares = " + (row["NumShares"] - numShares) +
-									" WHERE Ticker LIKE '" + ticker + "'",
-									function(){
-										res.status(200).json({"text": numShares + " shares of stock " + ticker + " have been sold at a price of " +
-																					parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
-																					" per share (total: $" + totalValue + ")"});
-								});
-							}
-						});
-					}
-				});
-			}
+							db.get("SELECT * FROM accounts WHERE AcctNum like '" + acctNum + "'", function(err, balRow) {
+								//Updating the account balance
+								db.run("UPDATE accounts SET Balance = " + (balRow["Balance"] + totalValue) + " WHERE AcctNum like '" + acctNum + "'");
+
+								if (row["NumShares"] == numShares){
+									db.run("DELETE FROM StocksInAccounts WHERE Ticker LIKE '" + ticker + "'",
+										function(){
+											res.status(200).json({"text": "All shares of stock " + ticker + " (" + numShares + " shares) have been sold at a price of " +
+																						parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
+																						" per share (total: $" + totalValue + ")"});
+									});
+								}else{
+									db.run("UPDATE StocksInAccounts SET " +
+										"NumShares = " + (row["NumShares"] - numShares) +
+										" WHERE Ticker LIKE '" + ticker + "'",
+										function(){
+											res.status(200).json({"text": numShares + " shares of stock " + ticker + " have been sold at a price of " +
+																						parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
+																						" per share (total: $" + totalValue + ")"});
+									});
+								}
+							});
+						}
+					});
+				}
+			});
 		});
-	});
+	}else if (result == 403){
+		res.status(403).send("Error: This account does not belong to you.")
+	}else if (result == 401){
+		res.status(401).send("Error: Please login before accessing this account.")
+	}else{
+		res.status(500).send("The server experienced an error. Please try again.")
+	}
 }
 
 function updateBalance(req, res, next){
 	let amount = req.query.amount;
 	let acctNum = req.query.currAcct;
 
-	db.get("SELECT * FROM accounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
-		if (row){
-			db.run("UPDATE accounts SET Balance = " + (row["Balance"] + parseFloat(amount)) + " WHERE AcctNum like '" + acctNum + "'",
-				function(){
-					if (amount > 0){
-						res.status(200).json({"text": "$" + amount + " has been deposited into account " + acctNum});
-					}else{
-						res.status(200).json({"text": "$" + (parseFloat(amount) * -1) + " has been withdrawn from account " + acctNum});
+	let validateResult = validateAccountOwner(req, acctNum);
+
+	if (validateResult == 200){
+		db.get("SELECT * FROM accounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
+			if (row){
+				db.run("UPDATE accounts SET Balance = " + (row["Balance"] + parseFloat(amount)) + " WHERE AcctNum like '" + acctNum + "'",
+					function(){
+						if (amount > 0){
+							res.status(200).json({"text": "$" + amount + " has been deposited into account " + acctNum});
+						}else{
+							res.status(200).json({"text": "$" + (parseFloat(amount) * -1) + " has been withdrawn from account " + acctNum});
+						}
 					}
-				}
-			);
-		}else{
-			res.status(404).json({"text":"Account not found."});
-		}
-	});
+				);
+			}else{
+				res.status(404).json({"text":"Account not found."});
+			}
+		});
+	}else if (result == 403){
+		res.status(403).send("Error: This account does not belong to you.")
+	}else if (result == 401){
+		res.status(401).send("Error: Please login before accessing this account.")
+	}else{
+		res.status(500).send("The server experienced an error. Please try again.")
+	}
 }
 
 //Helper function for sending 404 message
