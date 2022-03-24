@@ -165,18 +165,19 @@ function logout(req, res, next){
 	next();
 }
 
-function validateAccountOwner(req, acctNum){
+function validateAccountOwner(req, res, acctNum, successFunction){
 	if (req.session.loggedin){
 		db.get("SELECT * FROM CustomerAccounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
-			if (row["SSN"] == req.session.SSN){
-				console.log("valid")
-				return 200;
+			if (!row){
+				res.status(404).send("Error: This account does not exist.");
+			}else if (row["SSN"] == req.session.SSN){
+				successFunction(200);
 			}else{
-				return 403;
+				res.status(403).send("Error: This account does not belong to you.");
 			}
 		});
 	}else{
-		return 401;
+		res.status(401).send("Error: Please login before accessing this account.");
 	}
 }
 
@@ -220,24 +221,15 @@ function createProfile(req, res, next){
 }
 
 function getAccount(req, res, next){
-	let result = validateAccountOwner(req, req.params.AcctNum);
+	//let result = validateAccountOwner(req, req.params.AcctNum);
 
-	setTimeout(function(){
-		console.log("result: ", result)
+	successFunction = function(result){
+		db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
+			res.status(result).json(rows);
+		});
+	}
 
-		if (result == 403){
-			res.status(403).send("Error: This account does not belong to you.")
-		}else if (result == 401){
-			res.status(401).send("Error: Please login before accessing this account.")
-		}else if (result == 200){
-			db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
-				res.status(200).json(rows);
-			});
-		}else{
-			console.log("Error")
-			res.status(500).send("The server experienced an error. Please try again.")
-		}
-	}, 500);
+	validateAccountOwner(req, res, req.params.AcctNum, successFunction);
 }
 
 function getAllStocks(req, res, next){
