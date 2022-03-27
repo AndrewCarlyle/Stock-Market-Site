@@ -115,7 +115,6 @@ function getQuote(req, res, next) {
 
 			res.send(JSON.stringify(response));
     }else{
-      console.log("there was an error with the request");
 			send404(res);
     }
   });
@@ -221,8 +220,6 @@ function createProfile(req, res, next){
 }
 
 function getAccount(req, res, next){
-	//let result = validateAccountOwner(req, req.params.AcctNum);
-
 	successFunction = function(result){
 		db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
 			res.status(result).json(rows);
@@ -276,13 +273,11 @@ function addStock(req, res, next){
 										res.status(201).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and added to the database."});
 								});
 							}else{
-								console.log("there was an error with the request");
 								send404(res);
 							}
 						});
 
 					}else{
-						console.log("there was an error with the request");
 						send404(res);
 					}
 				});
@@ -341,13 +336,11 @@ function updateStock(req, res, next){
 										res.status(200).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."});
 								});
 							}else{
-								console.log("there was an error with the request");
 								send404(res);
 							}
 						});
 
 					}else{
-						console.log("there was an error with the request");
 						send404(res);
 					}
 				});
@@ -403,17 +396,14 @@ function openAccount(req, res, next){
 function buyStock(req, res, next){
 	let ticker = req.query.ticker;
 	let numShares = req.query.numShares;
-	let acctNum = req.query.currAcct;
+	let acctNum = req.query.AcctNum;
 
-	let validateResult = validateAccountOwner(req, acctNum);
-
-	if (validateResult == 200){
+	successFunction = function(result){
 		request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
 			let prices = JSON.parse(body);
 
 			//Verifying that the request worked
 			if (prices['Error Message']){
-
 				res.status(404).json(
 					{"text":"Stock with ticker \"" + ticker + "\" does not exist"}
 				);
@@ -486,23 +476,18 @@ function buyStock(req, res, next){
 					});
 				});
 			}else{
-				console.log("there was an error with the request");
 				send404(res);
 			}
 		});
-	}else if (result == 403){
-		res.status(403).send("Error: This account does not belong to you.")
-	}else if (result == 401){
-		res.status(401).send("Error: Please login before accessing this account.")
-	}else{
-		res.status(500).send("The server experienced an error. Please try again.")
 	}
+
+	validateAccountOwner(req, res, req.query.AcctNum, successFunction);
 }
 
 function sellStock(req, res, next){
 	let ticker = req.query.ticker;
 	let numShares = req.query.numShares;
-	let acctNum = req.query.currAcct;
+	let acctNum = req.query.AcctNum;
 
 	let validateResult = validateAccountOwner(req, acctNum);
 
@@ -572,7 +557,7 @@ function sellStock(req, res, next){
 
 function updateBalance(req, res, next){
 	let amount = req.query.amount;
-	let acctNum = req.query.currAcct;
+	let acctNum = req.query.AcctNum;
 
 	let validateResult = validateAccountOwner(req, acctNum);
 

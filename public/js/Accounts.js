@@ -423,7 +423,7 @@ function buyStock(){
   }
 
   let purchaseRequest = new XMLHttpRequest();
-  purchaseRequest.open("POST", "/Accounts/Buy?ticker=" + ticker + "&numShares=" + numShares + "&currAcct=" + currAcct);
+  purchaseRequest.open("POST", "/Accounts/Buy?ticker=" + ticker + "&numShares=" + numShares + "&AcctNum=" + currAcct);
   purchaseRequest.send();
 
   purchaseRequest.onreadystatechange = function() {
@@ -455,7 +455,7 @@ function sellStock(){
   }
 
   let sellRequest = new XMLHttpRequest();
-  sellRequest.open("POST", "/Accounts/Sell?ticker=" + ticker + "&numShares=" + numShares + "&currAcct=" + currAcct);
+  sellRequest.open("POST", "/Accounts/Sell?ticker=" + ticker + "&numShares=" + numShares + "&AcctNum=" + currAcct);
   sellRequest.send();
 
   sellRequest.onreadystatechange = function() {
@@ -482,7 +482,7 @@ function makeWithdrawal(){
 function updateAccountBalance(amount){
   if (isNaN(amount)){
     let request = new XMLHttpRequest();
-    request.open("POST", "/Accounts/AdjustBalance?amount=" + amount + "&currAcct=" + currAcct);
+    request.open("POST", "/Accounts/AdjustBalance?amount=" + amount + "&AcctNum=" + currAcct);
     request.send();
 
     request.onreadystatechange = function() {
