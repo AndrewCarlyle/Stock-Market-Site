@@ -4,6 +4,7 @@ TODO:
 2. Sessions, or something so that non-validated users cannot makes change to accounts
 3. Add current user info to the top right corner (regardless of the current page, maybe use js within the .html files?)
 4. Seperate the accounts page into multiple pages or use pug
+5. Make user select exchange first when buying/selling a stock
 */
 
 //Create express app
@@ -489,9 +490,7 @@ function sellStock(req, res, next){
 	let numShares = req.query.numShares;
 	let acctNum = req.query.AcctNum;
 
-	let validateResult = validateAccountOwner(req, acctNum);
-
-	if (validateResult == 200){
+	successFunction = function(result){
 		db.serialize(function(){
 			//Checking that there is sufficient funds
 			db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "'", function(err, row) {
@@ -546,13 +545,9 @@ function sellStock(req, res, next){
 				}
 			});
 		});
-	}else if (result == 403){
-		res.status(403).send("Error: This account does not belong to you.")
-	}else if (result == 401){
-		res.status(401).send("Error: Please login before accessing this account.")
-	}else{
-		res.status(500).send("The server experienced an error. Please try again.")
 	}
+
+	validateAccountOwner(req, res, req.query.AcctNum, successFunction);
 }
 
 function updateBalance(req, res, next){
