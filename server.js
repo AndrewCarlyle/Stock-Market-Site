@@ -554,9 +554,7 @@ function updateBalance(req, res, next){
 	let amount = req.query.amount;
 	let acctNum = req.query.AcctNum;
 
-	let validateResult = validateAccountOwner(req, acctNum);
-
-	if (validateResult == 200){
+	successFunction = function(result){
 		db.get("SELECT * FROM accounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
 			if (row){
 				db.run("UPDATE accounts SET Balance = " + (row["Balance"] + parseFloat(amount)) + " WHERE AcctNum like '" + acctNum + "'",
@@ -572,13 +570,9 @@ function updateBalance(req, res, next){
 				res.status(404).json({"text":"Account not found."});
 			}
 		});
-	}else if (result == 403){
-		res.status(403).send("Error: This account does not belong to you.")
-	}else if (result == 401){
-		res.status(401).send("Error: Please login before accessing this account.")
-	}else{
-		res.status(500).send("The server experienced an error. Please try again.")
 	}
+
+	validateAccountOwner(req, res, req.query.AcctNum, successFunction);
 }
 
 //Helper function for sending 404 message

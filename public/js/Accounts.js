@@ -480,7 +480,7 @@ function makeWithdrawal(){
 }
 
 function updateAccountBalance(amount){
-  if (isNaN(amount)){
+  if (!isNaN(amount)){
     let request = new XMLHttpRequest();
     request.open("POST", "/Accounts/AdjustBalance?amount=" + amount + "&AcctNum=" + currAcct);
     request.send();
