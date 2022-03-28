@@ -1,12 +1,3 @@
-/*
-TODO:
-1. Add some kind of ranking system for stocks
-2. Sessions, or something so that non-validated users cannot makes change to accounts
-3. Add current user info to the top right corner (regardless of the current page, maybe use js within the .html files?)
-4. Seperate the accounts page into multiple pages or use pug
-5. Make user select exchange first when buying/selling a stock
-*/
-
 //Create express app
 const express = require('express');
 let app = express();
