@@ -389,6 +389,7 @@ function buyStock(req, res, next){
 	let ticker = req.query.ticker;
 	let numShares = req.query.numShares;
 	let acctNum = req.query.AcctNum;
+	let exchange = req.query.exchange;
 
 	successFunction = function(result){
 		request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
@@ -396,13 +397,9 @@ function buyStock(req, res, next){
 
 			//Verifying that the request worked
 			if (prices['Error Message']){
-				res.status(404).json(
-					{"text":"Stock with ticker \"" + ticker + "\" does not exist"}
-				);
+				res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" does not exist"});
 			}else if (prices["Note"]){
-				res.status(409).json(
-					{"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."}
-				);
+				res.status(409).json({"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."});
 			}else if (prices != null){
 				let totalCost = numShares * parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2);
 
@@ -411,14 +408,12 @@ function buyStock(req, res, next){
 					db.get("SELECT * FROM accounts WHERE AcctNum like '" + acctNum + "'", function(err, row) {
 						if (row){
 							if (row["Balance"] < totalCost){
-								res.status(409).json(
-									{"text":"Insufficient funds to make this transaction, try again with a lower number of shares."}
-								);
+								res.status(409).json({"text":"Insufficient funds to make this transaction, try again with a lower number of shares."});
 							}else {
 								//Updating the account balance
 								db.run("UPDATE accounts SET Balance = " + (row["Balance"] - totalCost) + " WHERE AcctNum like '" + acctNum + "'");
 
-								db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "'", function(err, row) {
+								db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "' AND ExName like '" + exchange + "'", function(err, row) {
 									//Some shares of this stock already held
 									if (row){
 										let totalShares = parseInt(row["NumShares"]) + parseInt(numShares);
@@ -429,7 +424,8 @@ function buyStock(req, res, next){
 										db.run("UPDATE StocksInAccounts SET " +
 											"NumShares = " + totalShares +
 											", ShareCost = " + newAvg +
-											" WHERE Ticker LIKE '" + ticker + "'",
+											" WHERE Ticker LIKE '" + ticker +
+											"' AND ExName LIKE '" + exchange + "'",
 											function(){
 												res.status(200).json({"text": numShares + " shares of stock " + ticker + " have been purchased at a price of $" +
 																							parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
@@ -480,11 +476,12 @@ function sellStock(req, res, next){
 	let ticker = req.query.ticker;
 	let numShares = req.query.numShares;
 	let acctNum = req.query.AcctNum;
+	let exchange = req.query.exchange;
 
 	successFunction = function(result){
 		db.serialize(function(){
 			//Checking that there is sufficient funds
-			db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "'", function(err, row) {
+			db.get("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + acctNum + "' AND Ticker like '" + ticker + "' AND ExName like '" + exchange + "'", function(err, row) {
 				if (row["NumShares"] < numShares){
 					res.status(409).json(
 						{"text":"You own less shares of " + ticker + " than you have requested to sell."}
@@ -504,7 +501,7 @@ function sellStock(req, res, next){
 							);
 						}else if (prices["Note"]){
 							res.status(409).json(
-								{"text":"Calls to API have been exceeded, please try purchasing again in a few minutes."}
+								{"text":"Calls to API have been exceeded, please try selling again in a few minutes."}
 							);
 						}else{
 							let totalValue = numShares * parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2);
@@ -514,7 +511,7 @@ function sellStock(req, res, next){
 								db.run("UPDATE accounts SET Balance = " + (balRow["Balance"] + totalValue) + " WHERE AcctNum like '" + acctNum + "'");
 
 								if (row["NumShares"] == numShares){
-									db.run("DELETE FROM StocksInAccounts WHERE Ticker LIKE '" + ticker + "'",
+									db.run("DELETE FROM StocksInAccounts WHERE Ticker LIKE '" + ticker + "' AND ExName like '" + exchange + "'",
 										function(){
 											res.status(200).json({"text": "All shares of stock " + ticker + " (" + numShares + " shares) have been sold at a price of " +
 																						parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
@@ -523,7 +520,7 @@ function sellStock(req, res, next){
 								}else{
 									db.run("UPDATE StocksInAccounts SET " +
 										"NumShares = " + (row["NumShares"] - numShares) +
-										" WHERE Ticker LIKE '" + ticker + "'",
+										" WHERE Ticker LIKE '" + ticker + "' AND ExName like '" + exchange + "'",
 										function(){
 											res.status(200).json({"text": numShares + " shares of stock " + ticker + " have been sold at a price of " +
 																						parseFloat(prices["Time Series (5min)"][prices["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +

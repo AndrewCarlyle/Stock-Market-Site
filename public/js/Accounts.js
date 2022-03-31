@@ -415,6 +415,7 @@ function openAccount(){
 
 function buyStock(){
   let ticker = prompt("What is the ticker of the stock you would like to buy?").toUpperCase();
+  let exchange = prompt("What exchange is this stock on?").toUpperCase();
   let numShares = prompt("How many shares would you like to buy?");
 
   if (!ticker || isNaN(numShares) || numShares < 1){
@@ -423,7 +424,7 @@ function buyStock(){
   }
 
   let purchaseRequest = new XMLHttpRequest();
-  purchaseRequest.open("POST", "/Accounts/Buy?ticker=" + ticker + "&numShares=" + numShares + "&AcctNum=" + currAcct);
+  purchaseRequest.open("POST", "/Accounts/Buy?ticker=" + ticker + "&numShares=" + numShares + "&AcctNum=" + currAcct + "&exchange=" + exchange);
   purchaseRequest.send();
 
   purchaseRequest.onreadystatechange = function() {
@@ -446,7 +447,8 @@ function buyStock(){
 }
 
 function sellStock(){
-  let ticker = prompt("What is the ticker of the stock you would like to sell?");
+  let ticker = prompt("What is the ticker of the stock you would like to sell?").toUpperCase();
+  let exchange = prompt("What exchange is this stock on?").toUpperCase();
   let numShares = prompt("How many shares would you like to sell?");
 
   if (!ticker || isNaN(numShares) || numShares < 1){
@@ -455,7 +457,7 @@ function sellStock(){
   }
 
   let sellRequest = new XMLHttpRequest();
-  sellRequest.open("POST", "/Accounts/Sell?ticker=" + ticker + "&numShares=" + numShares + "&AcctNum=" + currAcct);
+  sellRequest.open("POST", "/Accounts/Sell?ticker=" + ticker + "&numShares=" + numShares + "&AcctNum=" + currAcct + "&exchange=" + exchange);
   sellRequest.send();
 
   sellRequest.onreadystatechange = function() {
