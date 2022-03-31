@@ -213,6 +213,8 @@ function createProfile(req, res, next){
 
 function getAccount(req, res, next){
 	successFunction = function(result){
+		res.render("AccountList.pug", {accounts: rows, optionList:["TFSA", "RRSP", "RRIF", "LIRA", "RESP", "Cash"]});
+		return;
 		db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
 			res.status(result).json(rows);
 		});
