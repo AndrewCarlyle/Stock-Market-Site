@@ -7,7 +7,7 @@ TODO list:
 1. Add some kind of ranking system for stocks
 2. Organize resources better (some things are not accesible to pug files in/views)
 3. Add current user info to the top right corner (regardless of the current page, maybe use js within the .html files?)
-4. Seperate the accounts page into multiple pages or use pug
+4. Separate the accounts page into multiple pages or use pug
 5. Make user select exchange first when buying/selling a stock
 6. Add in something to limit repeated calls to the API (maybe taking the time into consideration?)
 7. Spend some time looking into what happens with TSX stocks
