@@ -80,7 +80,6 @@ function getQuote(req, res, next) {
 
 	let response;
 
-
   request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + tickerID +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
     //storing the response
     response = JSON.parse(body);
@@ -213,10 +212,13 @@ function createProfile(req, res, next){
 
 function getAccount(req, res, next){
 	successFunction = function(result){
-		res.render("AccountList.pug", {accounts: rows, optionList:["TFSA", "RRSP", "RRIF", "LIRA", "RESP", "Cash"]});
-		return;
-		db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
-			res.status(result).json(rows);
+		db.serialize(function() {
+			db.get("SELECT * FROM Accounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, row){
+				console.log(row)
+			});
+			db.all("SELECT * FROM StocksInAccounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
+				res.render("SingleAccount.pug", {stocks : rows});
+			});
 		});
 	}
 

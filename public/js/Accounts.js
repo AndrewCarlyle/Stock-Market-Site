@@ -39,8 +39,10 @@ function validateUser(){
         link.onclick = function (){
 
           currAcct = accounts[link.cnt]["AcctNum"];
+          window.location.href = "/Accounts/" + currAcct;
 
-          let req = new XMLHttpRequest();
+          /*let req = new XMLHttpRequest();
+
           req.open("GET", "/Accounts/" + accounts[link.cnt]["AcctNum"]);
           req.send();
 
@@ -48,7 +50,7 @@ function validateUser(){
             if (this.readyState==4 && this.status == 200){
               displayAccount(JSON.parse(this.responseText), accounts[link.cnt]["Balance"]);
             }
-          };
+          };*/
         };
 
         link.appendChild(lblAccount);
