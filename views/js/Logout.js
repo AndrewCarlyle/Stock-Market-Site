@@ -21,9 +21,8 @@ function sessionStatus(){
   request.onreadystatechange = function(){
     if (this.readyState==4 && this.status == 200){
       let response = JSON.parse(this.responseText);
-      console.log(response)
-      if (response["Status"] == true){
 
+      if (response["Status"] == true){
         if (window.location.href.endsWith("Accounts") || window.location.href.endsWith("Accounts.html")){
           //Redirect
           window.location.href = "/Accounts/List"
