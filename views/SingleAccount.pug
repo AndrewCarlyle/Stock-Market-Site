@@ -1,0 +1,45 @@
+html
+  head
+    div(class="topnav" id="head" num=acctNum)
+      a(href="/Home.html")="Home "
+      a(href="/Quote.html")="Quote "
+      a(href="/Accounts.html")="Accounts "
+      a(href="/StockList.html")="Stock List"
+    style
+      include css/AccountList.css
+    script
+      include js/SingleAccount.js
+    script
+      include js/Logout.js
+
+  body(onload="sessionStatus();setAcctNum();")
+    br
+    button(onclick="makeDeposit()")="Make a deposit"
+    button(onclick="makeWithdrawal()")="Make a withdrawal"
+    button(onclick="buyStock()")="Buy a stock"
+    button(onclick="sellStock()")="Sell a stock"
+
+    br
+    br
+    a="Market Value: $" + marketVal
+    br
+    a="Cash Value: $" + cash
+    br
+    a="Total Equity: $" + equity
+    br
+    br
+
+    each stock in stocks
+      a=stock.Ticker + ":" + stock.ExName + " Shares Owned: " + stock.NumShares
+      br
+      a="Average Cost: $" + stock.ShareCost
+      br
+      a="Total Cost: $" + stock.totalCost
+      br
+      a="Current Price: $" + stock.Price
+      br
+      a="Total Value: $" + stock.value
+      br
+      a="Profit/Loss: $" + stock.profit
+      br
+      br
