@@ -215,16 +215,18 @@ function getAccount(req, res, next){
 		db.serialize(function() {
 			let cash;
 			db.get("SELECT * FROM Accounts WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, row){
-				cash = row;
+				cash = row["Balance"];
 			});
 			db.all("SELECT * FROM StocksInAccounts NATURAL JOIN stocks WHERE AcctNum like '" + req.params.AcctNum + "'", function(err, rows) {
 				let marketVal = 0;
 				for (row in rows){
-
+					rows[row]["totalCost"] = (rows[row]["ShareCost"] * rows[row]["NumShares"]).toFixed(2);
+					rows[row]["value"] = (rows[row]["Price"] * rows[row]["NumShares"]).toFixed(2);
+					rows[row]["profit"] = (rows[row]["value"] - rows[row]["totalCost"]).toFixed(2);
 					marketVal += rows[row]["NumShares"] * rows[row]["Price"];
 				}
-				console.log(marketVal)
-				res.render("SingleAccount.pug", {stocks : rows, cash : cash, marketVal : marketVal});
+
+				res.render("SingleAccount.pug", {stocks : rows, cash : cash, marketVal : marketVal, equity : (cash+marketVal), acctNum : req.params.AcctNum});
 			});
 		});
 	}
