@@ -674,3 +674,50 @@ function transferUsers(){
 			});
 		});
 }
+
+function updateStocks(){
+	db.serialize(function() {
+		db.all("SELECT * FROM stocks", function(err, rows) {
+			for (stock in rows){
+				if (rows[stock]["ExName"] != 'TSX'){
+					console.log(rows[stock]["Ticker"]);
+					//Wait 30 seconds before updating each stock
+					setTimeout(fetchStockInfo(rows[stock]["Ticker"], rows[stock]["ExName"]), 1000 * 30);
+				}
+			}
+		});
+	});
+}
+
+function fetchStockInfo(ticker, exchange){
+	request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, pricesBody){
+		//Verifying that the request worked
+		if (JSON.parse(pricesBody)['Error Message']){
+			console.log("Error requesting the stock info.");
+			return -1;
+		}
+
+		request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
+			if (JSON.parse(overviewBody)['Error Message']){
+				console.log("Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to update it in our database");
+				return -2;
+			}
+
+			let combinedResponse = {};
+
+			combinedResponse["Prices"] = JSON.parse(pricesBody);
+			combinedResponse["Overview"] = JSON.parse(overviewBody);
+
+			db.run("UPDATE stocks SET " +
+				"Price = " + parseFloat(combinedResponse["Prices"]["Time Series (5min)"][combinedResponse["Prices"]["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
+				", DivYield = " +(combinedResponse["Overview"]["DividendYield"] * 100) +
+				", YearHigh = " + combinedResponse["Overview"]["52WeekHigh"] +
+				", YearLow = " + combinedResponse["Overview"]["52WeekLow"] +
+				" WHERE Ticker LIKE '" + ticker + "' AND ExName like '" + exchange + "'"
+			);
+		});
+	});
+}
+
+updateStocks();
+//setInterval(updateStocks, 1000 * 60 * 60 * 24);
