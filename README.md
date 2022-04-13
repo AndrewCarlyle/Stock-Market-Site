@@ -11,3 +11,4 @@ TODO list:
 5. Add in something to limit repeated calls to the API (maybe taking the time into consideration?)
 6. Spend some time looking into what happens with TSX stocks
 7. Fix updateStock function to account for exchange
+8. Consolidate the fetchStockInfo() and updateStock() function together
