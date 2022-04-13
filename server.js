@@ -175,7 +175,7 @@ function validateAccountOwner(req, res, acctNum, successFunction){
 
 //Responds to the users request with a list of all their accounts
 function getAccountList(req, res, next){
-	if (req.session.loggedin == false){
+	if (!req.session.loggedin){
 		res.status(401).send("Please log in to view your accounts.")
 	}else{
 		db.all("SELECT * FROM CustomerAccounts natural join accounts WHERE SSN like " + req.session.SSN, function(err, rows) {
@@ -313,42 +313,9 @@ function updateStock(req, res, next){
 	db.serialize(function() {
 		db.get("SELECT * FROM stocks WHERE Ticker LIKE '" + ticker + "'", function(err, row){
 			if (row){
-				request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, pricesBody){
+				result = fetchStockInfo(ticker, exchange);
 
-					//Verifying that the request worked
-					if (JSON.parse(pricesBody)['Error Message']){
-						res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" does not exist"});
-					}else if (pricesBody != null){
-
-						request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
-
-							//Verifying that the request worked
-							if (JSON.parse(overviewBody)['Error Message']){
-								res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"});
-							}else if (overviewBody != null){
-								let combinedResponse = {};
-
-								combinedResponse["Prices"] = JSON.parse(pricesBody);
-								combinedResponse["Overview"] = JSON.parse(overviewBody);
-
-								db.run("UPDATE stocks SET " +
-									"Price = " + parseFloat(combinedResponse["Prices"]["Time Series (5min)"][combinedResponse["Prices"]["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
-									", DivYield = " +(combinedResponse["Overview"]["DividendYield"] * 100) +
-									", YearHigh = " + combinedResponse["Overview"]["52WeekHigh"] +
-									", YearLow = " + combinedResponse["Overview"]["52WeekLow"] +
-									" WHERE Ticker LIKE '" + ticker + "'",
-									function(){
-										res.status(200).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."});
-								});
-							}else{
-								send404(res);
-							}
-						});
-
-					}else{
-						send404(res);
-					}
-				});
+				res.status(result.code).json(result.message);
 			}else{
 				res.status(404).json({"text":"Stock " + ticker + " could not be found in the database."});
 			}
@@ -695,8 +662,7 @@ function setUpdateIntervals(stocks){
 	fetchStockInfo(stock.ticker, stock.exchange);
 
 	if (stocks.length > 0){
-		//setTimeout(setUpdateIntervals, 1000 * 30, stocks);
-		setTimeout(setUpdateIntervals, 100, stocks);
+		setTimeout(setUpdateIntervals, 1000 * 30, stocks);
 	}
 }
 

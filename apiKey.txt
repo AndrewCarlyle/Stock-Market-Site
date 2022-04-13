@@ -1,5 +1,1 @@
 LQLHQ491NM8JFP72
-
-https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=APPL&interval=5min&apikey=LQLHQ491NM8JFP72
-
-https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=APPL&apikey=LQLHQ491NM8JFP72
