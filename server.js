@@ -324,9 +324,7 @@ function updateStock(req, res, next){
 
 							//Verifying that the request worked
 							if (JSON.parse(overviewBody)['Error Message']){
-								res.status(404).json(
-									{"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"}
-								);
+								res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"});
 							}else if (overviewBody != null){
 								let combinedResponse = {};
 
@@ -694,8 +692,7 @@ function updateStocks(){
 //Updating one stock at a time, every 30 seconds
 function setUpdateIntervals(stocks){
 	let stock = stocks.pop();
-	//fetchStockInfo(stock.ticker, stock.exchange);
-	console.log(stock.ticker)
+	fetchStockInfo(stock.ticker, stock.exchange);
 
 	if (stocks.length > 0){
 		//setTimeout(setUpdateIntervals, 1000 * 30, stocks);
@@ -707,14 +704,13 @@ function fetchStockInfo(ticker, exchange){
 	request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, pricesBody){
 		//Verifying that the request worked
 		if (JSON.parse(pricesBody)['Error Message'] || JSON.parse(pricesBody)['Note']){
-			console.log("Error requesting the stock info.");
-			return -1;
+			return {code: 404, message: {"text":"Stock with ticker \"" + ticker + "\" does not exist"}};
 		}
 
 		request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
 			if (JSON.parse(overviewBody)['Error Message'] || JSON.parse(overviewBody)['Note']){
 				console.log("Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to update it in our database");
-				return -2;
+				return {code: 404, message: {"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"}};
 			}
 
 			let combinedResponse = {};
@@ -729,6 +725,8 @@ function fetchStockInfo(ticker, exchange){
 				", YearLow = " + combinedResponse["Overview"]["52WeekLow"] +
 				" WHERE Ticker LIKE '" + ticker + "' AND ExName like '" + exchange + "'"
 			);
+
+			return {code: 200, message: {"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."}}
 		});
 	});
 }
