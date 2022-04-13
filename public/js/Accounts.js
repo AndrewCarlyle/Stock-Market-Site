@@ -40,17 +40,6 @@ function validateUser(){
 
           currAcct = accounts[link.cnt]["AcctNum"];
           window.location.href = "/Accounts/" + currAcct;
-
-          /*let req = new XMLHttpRequest();
-
-          req.open("GET", "/Accounts/" + accounts[link.cnt]["AcctNum"]);
-          req.send();
-
-          req.onreadystatechange = function(){
-            if (this.readyState==4 && this.status == 200){
-              displayAccount(JSON.parse(this.responseText), accounts[link.cnt]["Balance"]);
-            }
-          };*/
         };
 
         link.appendChild(lblAccount);
