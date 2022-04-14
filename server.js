@@ -58,7 +58,7 @@ app.post('/Accounts/Logout', logout, sendHome);
 app.post('/Accounts/CreateProfile', createProfile);
 app.post('/Stocklist/AddStock/:ticker', addStock);
 app.post('/Stocklist/RemoveStock/:ticker', removeStock);
-app.post('/Stocklist/UpdateStock/:ticker', updateStock);
+app.post('/Stocklist/UpdateStock', updateStock);
 app.post('/Accounts/OpenAccount', openAccount);
 app.post('/Accounts/Buy', buyStock);
 app.post('/Accounts/Sell', sellStock);
@@ -308,7 +308,8 @@ function removeStock(req, res, next){
 }
 
 function updateStock(req, res, next){
-	let ticker = req.params.ticker;
+	let ticker = req.query.ticker;
+	let exchange = req.query.exchange;
 
 	db.serialize(function() {
 		db.get("SELECT * FROM stocks WHERE Ticker LIKE '" + ticker + "'", function(err, row){
