@@ -67,9 +67,10 @@ function addStock(){
 
 function updateStock(){
   let stockTicker = prompt("Please enter the stock ticker that you wish to update:").toUpperCase();
+  let exchange = prompt("Please enter the exchange that this stock is on:").toUpperCase();
 
   let request = new XMLHttpRequest();
-  request.open("POST", "/Stocklist/UpdateStock/" + stockTicker);
+  request.open("POST", "/Stocklist/UpdateStock/?ticker=" + stockTicker + "&exchange=" + exchange);
   request.send();
 
   request.onreadystatechange = function() {
