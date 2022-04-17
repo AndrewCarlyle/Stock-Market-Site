@@ -64,10 +64,6 @@ app.post('/Accounts/Buy', buyStock);
 app.post('/Accounts/Sell', sellStock);
 app.post('/Accounts/AdjustBalance', updateBalance);
 
-function sendResponse(res, result){
-	res.status(result.code).json(result.message);
-}
-
 function sendHome(req, res, next) {
 	res.sendFile(path.join(__dirname + '/public/html' + '/Home.html'));
 	return;
@@ -318,7 +314,7 @@ function updateStock(req, res, next){
 	db.serialize(function() {
 		db.get("SELECT * FROM stocks WHERE Ticker LIKE '" + ticker + "'", function(err, row){
 			if (row){
-				result = fetchStockInfo(ticker, exchange, sendResponse, res);
+				result = fetchStockInfo(ticker, exchange, res);
 			}else{
 				res.status(404).json({"text":"Stock " + ticker + " could not be found in the database."});
 			}
@@ -669,12 +665,12 @@ function setUpdateIntervals(stocks){
 	}
 }
 
-function fetchStockInfo(ticker, exchange, callback, res){
+function fetchStockInfo(ticker, exchange, res){
 	request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, pricesBody){
 		//Verifying that the request worked
 		if (JSON.parse(pricesBody)['Error Message'] || JSON.parse(pricesBody)['Note']){
-			if (callback){
-				callback(res, {code: 404, message: {"text":"Stock with ticker \"" + ticker + "\" does not exist"}});
+			if (res){
+				res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" does not exist"});
 			}else{
 				console.log("Stock with ticker \"" + ticker + "\" does not exist")
 			}
@@ -682,8 +678,8 @@ function fetchStockInfo(ticker, exchange, callback, res){
 
 		request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
 			if (JSON.parse(overviewBody)['Error Message'] || JSON.parse(overviewBody)['Note']){
-				if (callback){
-					callback(res, {code: 404, message: {"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"}});
+				if (res){
+					res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"});
 				}else{
 					console.log("Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to update it in our database");
 				}
@@ -702,8 +698,8 @@ function fetchStockInfo(ticker, exchange, callback, res){
 				" WHERE Ticker LIKE '" + ticker + "' AND ExName like '" + exchange + "'"
 			);
 
-			if (callback){
-				callback(res, {code: 200, message: {"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."}});
+			if (res){
+				res.status(200).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."});
 			}else{
 				console.log("Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database.")
 			}
@@ -711,6 +707,4 @@ function fetchStockInfo(ticker, exchange, callback, res){
 	});
 }
 
-//updateStocks();
-//setInterval(updateStocks, 1000 * 60 * 60 * 24);
-//schedule.scheduleJob('0 0 * * *', updateStocks);
+schedule.scheduleJob('0 0 * * *', updateStocks);
