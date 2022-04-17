@@ -8,7 +8,5 @@ TODO list:
 2. Organize resources better (some things are not accessible to pug files in/views)
 3. Add current user info to the top right corner (regardless of the current page, maybe use js within the .html files?)
 4. Use pug page to present list of accounts
-5. Add in something to limit repeated calls to the API (maybe taking the time into consideration?)
-6. Spend some time looking into what happens with TSX stocks
-7. Fix updateStock function to account for exchange
-8. Consolidate the fetchStockInfo() and updateStock() function together
+5. Spend some time looking into what happens with TSX stocks
+6. Fix updateStock function to account for exchange
