@@ -9,7 +9,7 @@ function loadStocks(){
 
       //Getting the response
       let response = JSON.parse(this.responseText);
-      console.log(response);
+
       let slMainDiv = document.getElementById("mainDiv");
 
       slMainDiv.remove();
