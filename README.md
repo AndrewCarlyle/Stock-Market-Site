@@ -10,3 +10,4 @@ TODO list:
 4. Use pug page to present list of accounts
 5. Spend some time looking into what happens with TSX stocks
 6. Fix updateStock function to account for exchange
+7. Add in dividends

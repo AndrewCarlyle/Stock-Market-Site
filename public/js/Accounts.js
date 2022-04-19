@@ -16,7 +16,6 @@ function validateUser(){
       //Getting the response
       let response = JSON.parse(this.responseText);
       let accounts = response["accounts"];
-      console.log(response)
       sin = response["sin"];
 
       //Clearing away the buttons and UN/PW fields
