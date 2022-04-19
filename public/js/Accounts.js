@@ -12,52 +12,7 @@ function validateUser(){
 
   request.onreadystatechange = function() {
     if(this.readyState==4 && this.status == 200){
-
-      //Getting the response
-      let response = JSON.parse(this.responseText);
-      let accounts = response["accounts"];
-      sin = response["sin"];
-
-      //Clearing away the buttons and UN/PW fields
-      let infoDiv = document.getElementById("infoDiv");
-      infoDiv.remove();
-
-      let mainDiv = document.getElementById("mainDiv");
-      let accountList = document.createElement("div");
-
-      accountList.id = "accountList";
-
-      let count = 0;
-
-      for (act in accounts){
-        let link = document.createElement('account');
-        let lblAccount = document.createTextNode("\n" + accounts[count]["Type"] + " (" + accounts[count]["AcctNum"] + ")");
-        let lblBalance = document.createTextNode("\n      Balance: $" + accounts[count]["Balance"] + "\n");
-        link.cnt = count;
-
-        link.onclick = function (){
-
-          currAcct = accounts[link.cnt]["AcctNum"];
-          window.location.href = "/Accounts/" + currAcct;
-        };
-
-        link.appendChild(lblAccount);
-
-        accountList.appendChild(link);
-        accountList.appendChild(lblBalance);
-
-        mainDiv.appendChild(accountList);
-
-        count++;
-      }
-      let btnRecommendations = document.createElement("button");
-      btnRecommendations.id = "btnRecommendations";
-      btnRecommendations.innerHTML = "Get Recommendations";
-      btnRecommendations.onclick = getRecommendations;
-      mainDiv.appendChild(btnRecommendations);
-
-      displayOpenAccountOption("old");
-
+      window.location.href = "/Accounts/List"
     }else if(this.readyState==4 && this.status == 401){
       let response = JSON.parse(this.responseText);
       alert(response["text"]);
