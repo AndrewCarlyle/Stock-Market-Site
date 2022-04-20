@@ -46,6 +46,7 @@ app.get("/Accounts/List", getAccountList);
 app.get('/Home', sendHome);
 app.get("/Accounts/Session", getSessionStatus);
 app.get("/Stocklist/Quote/:ticker", getQuote);
+app.get("/Stocklist/Info/:ticker", getStockInfo)
 app.get("/Accounts/Recommendations", recommendationRequest);
 app.get("/Accounts/:AcctNum", getAccount);
 app.get("/Stocklist/Quote", getAllStocks);
@@ -64,18 +65,18 @@ app.post('/Accounts/Buy', buyStock);
 app.post('/Accounts/Sell', sellStock);
 app.post('/Accounts/AdjustBalance', updateBalance);
 
-function sendHome(req, res, next) {
+function sendHome(req, res, next){
 	res.sendFile(path.join(__dirname + '/public/html' + '/Home.html'));
 	return;
 }
 
-function sendAccounts(req, res, next) {
+function sendAccounts(req, res, next){
 	res.sendFile(path.join(__dirname + '/public/html' + '/Accounts.html'));
 	return;
 }
 
 //Responds to the client with a quote for the stock based on the ticker parameter
-function getQuote(req, res, next) {
+function getQuote(req, res, next){
 
 	//Getting the id parameter value
 	let tickerID = req.params.ticker;
@@ -113,6 +114,12 @@ function getQuote(req, res, next) {
   });
 
 	return;
+}
+
+//Sends a pug page with detailed stock information
+function getStockInfo(req, res, next){
+	//Validate that stock info is found
+	res.render("stock.pug")
 }
 
 function login(req, res, next){
