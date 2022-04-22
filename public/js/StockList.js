@@ -24,7 +24,7 @@ function loadStocks(){
       for (stock in response){
         let stockName = document.createElement('a');
         stockName.innerHTML = response[stock]["ExName"] + ":" + response[stock]["Ticker"];
-        stockName.href = "/Stocklist/Info/" + response[stock]["ticker"];
+        stockName.href = "/Stocklist/Info/" + response[stock]["Ticker"];
 
         let newStock = document.createElement('a');
         newStock.innerHTML = stockToString(response[stock]);

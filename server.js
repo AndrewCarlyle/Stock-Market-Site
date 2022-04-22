@@ -118,8 +118,13 @@ function getQuote(req, res, next){
 
 //Sends a pug page with detailed stock information
 function getStockInfo(req, res, next){
-	//Validate that stock info is found
-	res.render("stock.pug")
+	let ticker = req.params.ticker;
+
+	request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, apiRes, body){
+		console.log(JSON.parse(body))
+		//Validate that stock info is found
+		res.render("stock.pug", {ticker : ticker})
+	});
 }
 
 function login(req, res, next){
