@@ -677,31 +677,30 @@ function fetchStockInfo(ticker, exchange, res){
 		}
 
 		request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
-			if (JSON.parse(overviewBody)['Error Message'] || JSON.parse(overviewBody)['Note']){
+			if (JSON.parse(overviewBody)['Error Message'] || JSON.parse(overviewBody)['Note'] || JSON.parse(overviewBody) == {}){
 				if (res){
 					res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"});
 				}else{
 					console.log("Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to update it in our database");
 				}
-			}
-
-			let combinedResponse = {};
-
-			combinedResponse["Prices"] = JSON.parse(pricesBody);
-			combinedResponse["Overview"] = JSON.parse(overviewBody);
-
-			db.run("UPDATE stocks SET " +
-				"Price = " + parseFloat(combinedResponse["Prices"]["Time Series (5min)"][combinedResponse["Prices"]["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
-				", DivYield = " +(combinedResponse["Overview"]["DividendYield"] * 100) +
-				", YearHigh = " + combinedResponse["Overview"]["52WeekHigh"] +
-				", YearLow = " + combinedResponse["Overview"]["52WeekLow"] +
-				" WHERE Ticker LIKE '" + ticker + "' AND ExName like '" + exchange + "'"
-			);
-
-			if (res){
-				res.status(200).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."});
 			}else{
-				console.log("Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database.")
+				let combinedResponse = {};
+				combinedResponse["Prices"] = JSON.parse(pricesBody);
+				combinedResponse["Overview"] = JSON.parse(overviewBody);
+
+				db.run("UPDATE stocks SET " +
+					"Price = " + parseFloat(combinedResponse["Prices"]["Time Series (5min)"][combinedResponse["Prices"]["Meta Data"]["3. Last Refreshed"]]["4. close"]).toFixed(2) +
+					", DivYield = " +(combinedResponse["Overview"]["DividendYield"] * 100) +
+					", YearHigh = " + combinedResponse["Overview"]["52WeekHigh"] +
+					", YearLow = " + combinedResponse["Overview"]["52WeekLow"] +
+					" WHERE Ticker LIKE '" + ticker + "' AND ExName like '" + exchange + "'"
+				);
+
+				if (res){
+					res.status(200).json({"text": "Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database."});
+				}else{
+					console.log("Stock " + combinedResponse["Overview"]["Name"] + " has been found and updated in the database.")
+				}
 			}
 		});
 	});
