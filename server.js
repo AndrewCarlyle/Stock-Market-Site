@@ -121,9 +121,13 @@ function getStockInfo(req, res, next){
 	let ticker = req.params.ticker;
 
 	request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, apiRes, body){
-		console.log(JSON.parse(body))
-		//Validate that stock info is found
-		res.render("stock.pug", {ticker : ticker})
+		let info = JSON.parse(body);
+
+		if (Object.keys(info).length == 0 || info['Error Message'] || info['Note']){
+			res.status(404).json({"text":"Could not get details for stock with ticker \"" + ticker + "\"."});
+		}else{
+			res.render("stock.pug", {info : info})
+		}
 	});
 }
 
