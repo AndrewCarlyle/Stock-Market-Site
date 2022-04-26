@@ -8,4 +8,24 @@ html
     style
       include css/AccountList.css
 
-  a="Test: "+ticker
+  br
+  a=info.Symbol + ":" + info.Exchange
+  br
+  br
+  a="P/E: " + info.PERatio
+  br
+  a="PEG: " + info.PEGRatio
+  br
+  a="Yield: " + (info.DividendYield * 100) + "%"
+  br
+  a="52 week high: " + info["52WeekHigh"]
+  br
+  a="52 week low: " + info["52WeekLow"]
+  br
+  a="50 day moving average: " + info["50DayMovingAverage"]
+  br
+  a="Above 50 day average?"
+  br
+  a="200 day moving average: " + info["200DayMovingAverage"]
+  br
+  a="Above 100 day average?"
