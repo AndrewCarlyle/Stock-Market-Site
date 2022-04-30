@@ -22,9 +22,14 @@ function loadStocks(){
       slMainDiv.appendChild(document.createTextNode("\n"));
 
       for (stock in response){
+        let stockName = document.createElement('a');
+        stockName.innerHTML = response[stock]["ExName"] + ":" + response[stock]["Ticker"];
+        stockName.href = "/Stocklist/Info/" + response[stock]["Ticker"];
+
         let newStock = document.createElement('a');
         newStock.innerHTML = stockToString(response[stock]);
 
+        slMainDiv.appendChild(stockName);
         slMainDiv.appendChild(newStock);
       }
 
@@ -34,12 +39,11 @@ function loadStocks(){
 }
 
 function stockToString(stock, currPrice){
-  return stock["ExName"] + ":" + stock["Ticker"] +
-  "\n     Current Price: $" + stock["Price"] +
-  "\n     52 Week High: $" + stock["YearHigh"] +
-  "\n     52 Week Low: $" + stock["YearLow"] +
-  "\n     Dividend Yield: " + stock["DivYield"] +
-  "\n\n";
+  return "\n     Current Price: $" + stock["Price"] +
+         "\n     52 Week High: $" + stock["YearHigh"] +
+         "\n     52 Week Low: $" + stock["YearLow"] +
+         "\n     Dividend Yield: " + stock["DivYield"] +
+         "\n\n";
 }
 
 function addStock(){

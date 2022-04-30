@@ -46,6 +46,7 @@ app.get("/Accounts/List", getAccountList);
 app.get('/Home', sendHome);
 app.get("/Accounts/Session", getSessionStatus);
 app.get("/Stocklist/Quote/:ticker", getQuote);
+app.get("/Stocklist/Info/:ticker", getStockInfo)
 app.get("/Accounts/Recommendations", recommendationRequest);
 app.get("/Accounts/:AcctNum", getAccount);
 app.get("/Stocklist/Quote", getAllStocks);
@@ -64,18 +65,18 @@ app.post('/Accounts/Buy', buyStock);
 app.post('/Accounts/Sell', sellStock);
 app.post('/Accounts/AdjustBalance', updateBalance);
 
-function sendHome(req, res, next) {
+function sendHome(req, res, next){
 	res.sendFile(path.join(__dirname + '/public/html' + '/Home.html'));
 	return;
 }
 
-function sendAccounts(req, res, next) {
+function sendAccounts(req, res, next){
 	res.sendFile(path.join(__dirname + '/public/html' + '/Accounts.html'));
 	return;
 }
 
 //Responds to the client with a quote for the stock based on the ticker parameter
-function getQuote(req, res, next) {
+function getQuote(req, res, next){
 
 	//Getting the id parameter value
 	let tickerID = req.params.ticker;
@@ -113,6 +114,65 @@ function getQuote(req, res, next) {
   });
 
 	return;
+}
+
+//Sends a pug page with detailed stock information
+function getStockInfo(req, res, next){
+	let ticker = req.params.ticker;
+
+	request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, apiRes, body){
+		request("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, pRes, pBody){
+			let parsedBody = JSON.parse(pBody)
+			let mostRecent = Object.keys(parsedBody['Time Series (Daily)'])[0];
+
+			price = parsedBody['Time Series (Daily)'][mostRecent]['4. close'];
+
+			//Get DAILY price here, take most recent high
+			let info = JSON.parse(body);
+			info["price"] = parseFloat(price).toFixed(2);
+
+			if (info["price"] < info["200DayMovingAverage"]){
+				info["lt200"] = "Yes";
+			}else{
+				info["lt200"] = "No";
+			}
+
+			if (info["price"] < info["50DayMovingAverage"]){
+				info["lt50"] = "Yes";
+			}else{
+				info["lt50"] = "No";
+			}
+
+			//Adding commas to the market cap
+			info["marketCap"] = "";
+
+			let count = 2 - info["MarketCapitalization"].length % 3;
+			let first = true;
+
+			for (i=0; i<info["MarketCapitalization"].length; i++){
+
+				if (count == 2){
+					if (!first){
+						info["marketCap"] += ",";
+					}
+
+					count = 0;
+				}else{
+					count++;
+				}
+
+				info["marketCap"] += info["MarketCapitalization"][i];
+
+				first = false;
+			}
+
+			if (Object.keys(info).length == 0 || info['Error Message'] || info['Note']){
+				res.status(404).json({"text":"Could not get details for stock with ticker \"" + ticker + "\"."});
+			}else{
+				res.render("stock.pug", {info : info})
+			}
+		});
+	});
 }
 
 function login(req, res, next){

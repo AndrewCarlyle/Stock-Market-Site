@@ -1,0 +1,42 @@
+html
+  head
+    div(class="topnav" id="head" num=acctNum)
+      a(href="/Home.html")="Home "
+      a(href="/Quote.html")="Quote "
+      a(href="/Accounts.html")="Accounts "
+      a(href="/StockList.html")="Stock List"
+    style
+      include css/AccountList.css
+
+  br
+  a=info.Symbol + ":" + info.Exchange
+  br
+  br
+  a="Price: $" + info.price
+  br
+  br
+  a="Traling P/E: " + info.TrailingPE
+  br
+  a="Forward P/E: " + info.ForwardPE
+  br
+  a="PEG: " + info.PEGRatio
+  br
+  a="Yield: " + (info.DividendYield * 100) + "%"
+  br
+  a="52 week high: " + info["52WeekHigh"]
+  br
+  a="52 week low: " + info["52WeekLow"]
+  br
+  a="50 day moving average: " + info["50DayMovingAverage"]
+  br
+  a="Below 50 day average? " + info["lt50"]
+  br
+  a="200 day moving average: " + info["200DayMovingAverage"]
+  br
+  a="Below 200 day average? " + info["lt200"]
+  br
+  a="Profit margin: " + (info.ProfitMargin * 100) + "%"
+  br
+  a="Beta: " + info.Beta
+  br
+  a="Market Cap: $" + info.marketCap
