@@ -10,5 +10,4 @@ TODO list:
 4. Spend some time looking into what happens with TSX stocks
 5. Fix updateStock function to account for exchange
 6. Add in dividends
-7. Add in ability to access detailed information about a stock
-8. Add in a way to search stocks
+7. Add in a way to search stocks by a certain metric(s)
