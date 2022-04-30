@@ -30,7 +30,8 @@ html
     br
 
     each stock in stocks
-      a=stock.Ticker + ":" + stock.ExName + " Shares Owned: " + stock.NumShares
+      a(href="/Stocklist/Info/"+stock.Ticker)=stock.Ticker + ":" + stock.ExName
+      a=" Shares Owned: " + stock.NumShares
       br
       a="Average Cost: $" + stock.ShareCost
       br
