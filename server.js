@@ -129,6 +129,42 @@ function getStockInfo(req, res, next){
 
 			//Get DAILY price here, take most recent high
 			let info = JSON.parse(body);
+			info["price"] = parseFloat(price).toFixed(2);
+
+			if (info["price"] < info["200DayMovingAverage"]){
+				info["lt200"] = "Yes";
+			}else{
+				info["lt200"] = "No";
+			}
+
+			if (info["price"] < info["50DayMovingAverage"]){
+				info["lt50"] = "Yes";
+			}else{
+				info["lt50"] = "No";
+			}
+
+			//Adding commas to the market cap
+			info["marketCap"] = "";
+
+			let count = 2 - info["MarketCapitalization"].length % 3;
+			let first = true;
+
+			for (i=0; i<info["MarketCapitalization"].length; i++){
+
+				if (count == 2){
+					if (!first){
+						info["marketCap"] += ",";
+					}
+
+					count = 0;
+				}else{
+					count++;
+				}
+
+				info["marketCap"] += info["MarketCapitalization"][i];
+
+				first = false;
+			}
 
 			if (Object.keys(info).length == 0 || info['Error Message'] || info['Note']){
 				res.status(404).json({"text":"Could not get details for stock with ticker \"" + ticker + "\"."});

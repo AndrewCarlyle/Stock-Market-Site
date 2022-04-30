@@ -12,7 +12,12 @@ html
   a=info.Symbol + ":" + info.Exchange
   br
   br
-  a="P/E: " + info.PERatio
+  a="Price: $" + info.price
+  br
+  br
+  a="Traling P/E: " + info.TrailingPE
+  br
+  a="Forward P/E: " + info.ForwardPE
   br
   a="PEG: " + info.PEGRatio
   br
@@ -24,8 +29,14 @@ html
   br
   a="50 day moving average: " + info["50DayMovingAverage"]
   br
-  a="Above 50 day average?"
+  a="Below 50 day average? " + info["lt50"]
   br
   a="200 day moving average: " + info["200DayMovingAverage"]
   br
-  a="Above 100 day average?"
+  a="Below 200 day average? " + info["lt200"]
+  br
+  a="Profit margin: " + (info.ProfitMargin * 100) + "%"
+  br
+  a="Beta: " + info.Beta
+  br
+  a="Market Cap: $" + info.marketCap
