@@ -39,6 +39,13 @@ function sessionStatus(){
           document.getElementById("head").appendChild(lblName);
           lblName.style = "font-size: 18px; position: relative; top: 50px; left: 8%";
         }
+      }else{
+        let btnLogin = document.createElement("button");
+        btnLogin.id = "btnLogin";
+        btnLogin.innerHTML = "Login";
+        btnLogin.onclick = function(){window.location.href = '/Accounts.html'};
+        document.getElementById("head").appendChild(btnLogin);
+        btnLogin.style = "height: 30px; width: 75px; position: relative; top: 10px; left: 20%";
       }
     }
   }
