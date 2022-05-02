@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="Home.css">
 
   <header>
-    <div class="topnav">
+    <div class="topnav" id="head">
       <a class="active" href="/Home.html">Home</a>
       <a href="/Quote.html">Get a Quote</a>
       <a href="/Accounts.html">Accounts</a>
@@ -13,7 +13,7 @@
     <h3 id="QuoteHeader">Get a stock quote:</h3>
   </header>
 
-  <body onload="sessionStatus(); sessionStatus();">
+  <body onload="sessionStatus();">
     <pre><div id="mainDiv">
       <input type="text" id="tickerBox"></input>    <button type="button" id="btnSubmit" onclick="getTicker()" style="height: 50px; width: 125px">Get Info</button>
     </div></pre>
