@@ -1,6 +1,8 @@
 //Create express app
 const schedule = require('node-schedule');
 
+const apiKey = "LQLHQ491NM8JFP72";
+
 const express = require('express');
 let app = express();
 
@@ -83,7 +85,7 @@ function getQuote(req, res, next){
 
 	let response;
 
-  request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + tickerID +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
+  request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + tickerID +"&interval=5min&apikey=" + apiKey, function(err, resp, body){
     //storing the response
     response = JSON.parse(body);
 		//Add code to query db if "note" recieved
@@ -101,7 +103,7 @@ function getQuote(req, res, next){
 		}else if (response != null){
 			db.get("SELECT * FROM stocks WHERE Ticker LIKE '" + tickerID + "'", function(err, row){
 				if (row){
-					request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + tickerID +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
+					request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + tickerID +"&apikey=" + apiKey, function(err, resp2, overviewBody){
 						let ovBody = JSON.parse(overviewBody);
 					});
 				}
@@ -120,8 +122,8 @@ function getQuote(req, res, next){
 function getStockInfo(req, res, next){
 	let ticker = req.params.ticker;
 
-	request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, apiRes, body){
-		request("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, pRes, pBody){
+	request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=" + apiKey, function(err, apiRes, body){
+		request("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker +"&apikey=" + apiKey, function(err, pRes, pBody){
 			let parsedBody = JSON.parse(pBody)
 			let mostRecent = Object.keys(parsedBody['Time Series (Daily)'])[0];
 
@@ -309,14 +311,14 @@ function addStock(req, res, next){
 
 		db.get("SELECT * FROM stocks WHERE Ticker LIKE '" + ticker +"'", function(err, row) {
 			if (row == null){
-				request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, pricesBody){
+				request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=" + apiKey, function(err, resp, pricesBody){
 
 					//Verifying that the request worked
 					if (JSON.parse(pricesBody)['Error Message']){
 						res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" does not exist"});
 					}else if (pricesBody != null){
 
-						request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
+						request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=" + apiKey, function(err, resp2, overviewBody){
 
 							//Verifying that the request worked
 							if (JSON.parse(overviewBody)['Error Message']){
@@ -431,7 +433,7 @@ function buyStock(req, res, next){
 	let exchange = req.query.exchange;
 
 	successFunction = function(result){
-		request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
+		request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=" + apiKey, function(err, resp, body){
 			let prices = JSON.parse(body);
 
 			//Verifying that the request worked
@@ -473,7 +475,7 @@ function buyStock(req, res, next){
 									//No shares of this stock owned
 									}else{
 										//Request to get the exchange name
-										request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
+										request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=" + apiKey, function(err, resp2, overviewBody){
 											let overview = JSON.parse(overviewBody);
 
 											if (overview["Note"]){
@@ -530,7 +532,7 @@ function sellStock(req, res, next){
 						{"text":"You do not own any shares of the stock with ticker \"" + ticker + "\"."}
 					);
 				}else{
-					request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, body){
+					request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=" + apiKey, function(err, resp, body){
 						let prices = JSON.parse(body);
 
 						//Verifying that the request worked
@@ -726,7 +728,7 @@ function setUpdateIntervals(stocks){
 }
 
 function fetchStockInfo(ticker, exchange, res){
-	request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=LQLHQ491NM8JFP72", function(err, resp, pricesBody){
+	request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + ticker +"&interval=5min&apikey=" + apiKey, function(err, resp, pricesBody){
 		//Verifying that the request worked
 		if (JSON.parse(pricesBody)['Error Message'] || JSON.parse(pricesBody)['Note']){
 			if (res){
@@ -736,7 +738,7 @@ function fetchStockInfo(ticker, exchange, res){
 			}
 		}
 
-		request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=LQLHQ491NM8JFP72", function(err, resp2, overviewBody){
+		request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=" + apiKey, function(err, resp2, overviewBody){
 			if (JSON.parse(overviewBody)['Error Message'] || JSON.parse(overviewBody)['Note'] || JSON.parse(overviewBody) == {}){
 				if (res){
 					res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"});
