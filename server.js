@@ -38,8 +38,8 @@ app.set("view engine", "pug");
 
 //Setting up the routes
 app.use(express.static("public/html"));
-app.use(express.static("public/js"));
-app.use(express.static("public/css"));
+app.use(express.static("views/js"));
+app.use(express.static("views/css"));
 app.use(express.json());
 
 app.get("/Accounts/List", getAccountList);

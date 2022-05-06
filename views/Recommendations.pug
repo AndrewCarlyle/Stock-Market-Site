@@ -5,7 +5,7 @@ html
       a(href="/Quote.html")="Quote "
       a(href="/Accounts.html")="Accounts "
       a(href="/StockList.html")="Stock List"
-      
+
     script
       include js/Logout.js
 
@@ -14,7 +14,7 @@ html
     br
     a="Recommendations are based on other users that invest in similar stocks."
 
-  body
+  body(onload="sessionStatus();")
     br
     each result in resultList
       br

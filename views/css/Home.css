@@ -1,0 +1,40 @@
+body {
+  background-color: powderblue;
+  text-align: center;
+  color: red;
+  font-size: 30px;
+}
+
+#btnSubmit {
+  background-color: green;
+  transition-duration: 0.4s;
+}
+
+#btnSubmit:hover {
+  background-color: red;
+  color: blue;
+}
+
+#slMainDiv {
+  font-size: 15px;
+}
+
+#displayMainDiv {
+  font-size: 20px;
+}
+
+account {
+  color: red;
+}
+
+account:hover {
+    color: yellow;
+}
+
+#accountList {
+  font-size: 20px;
+}
+
+#btnRecommendations {
+  padding: 10px 24px;
+}
