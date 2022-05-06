@@ -5,8 +5,7 @@ The frontend uses JS, HTML, and CSS. The backend uses JS for the server, a SQL d
 
 TODO list:
 1. Add some kind of ranking system for stocks
-2. Organize resources better (some things are not accessible to pug files in/views)
+2. Add in dividends
 3. Add in a way to search stocks by a certain metric(s)
 4. Spend some time looking into what happens with TSX stocks
 5. Fix updateStock function to account for exchange
-6. Add in dividends
