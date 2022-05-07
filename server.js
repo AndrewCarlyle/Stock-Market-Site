@@ -739,7 +739,7 @@ function fetchStockInfo(ticker, exchange, res){
 		}
 
 		request("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker +"&apikey=" + apiKey, function(err, resp2, overviewBody){
-			if (JSON.parse(overviewBody)['Error Message'] || JSON.parse(overviewBody)['Note'] || JSON.parse(overviewBody) == {}){
+			if (JSON.parse(overviewBody)['Error Message'] || JSON.parse(overviewBody)['Note'] || Object.keys(JSON.parse(overviewBody)).length == 0){
 				if (res){
 					res.status(404).json({"text":"Stock with ticker \"" + ticker + "\" may be an ETF and not a stock, we could not get enough information about it to add it to our database"});
 				}else{
