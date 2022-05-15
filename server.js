@@ -768,4 +768,18 @@ function fetchStockInfo(ticker, exchange, res){
 	});
 }
 
+function checkDividend(){
+	let date = "2022-05-14";
+	date = date.split("-")
+	let time = new Date();
+	console.log((time.getMonth()+1) == date[1])
+
+	time = time.toDateString().split(" ")
+
+	console.log(time[3] == date[0])
+	console.log(time[2] == date[2])
+}
+
+checkDividend();
+
 schedule.scheduleJob('0 0 * * *', updateStocks);
